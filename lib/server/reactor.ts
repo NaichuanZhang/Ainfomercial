@@ -18,6 +18,8 @@ function apiKey() {
 }
 
 type MintOptions = {
+  /** Model the token may open or attach to (default: the Orbis picture). */
+  model?: string;
   bindSessionIds?: string[];
   maxSessions: number;
   maxSessionDurationSeconds: number;
@@ -26,7 +28,7 @@ type MintOptions = {
 
 /** Mint a session-scoped Reactor JWT. The API key never leaves the server. */
 export async function mintReactorToken(options: MintOptions) {
-  const resources: Record<string, unknown> = { models: { match: [ORBIS_MODEL] } };
+  const resources: Record<string, unknown> = { models: { match: [options.model ?? ORBIS_MODEL] } };
   if (options.bindSessionIds?.length) resources.sessions = { bind: options.bindSessionIds };
 
   const response = await fetch(`${REACTOR_API_URL}/tokens`, {
@@ -57,11 +59,12 @@ export async function mintReactorToken(options: MintOptions) {
 }
 
 /**
- * Token for a browser to attach to the channel session. Binding one session with
+ * Token for a browser to attach to a channel session. Binding one session with
  * max_sessions 1 leaves no room to create another, so a leaked token cannot start a session.
  */
-export function mintAttachToken(sessionId: string) {
+export function mintAttachToken(sessionId: string, model: string = ORBIS_MODEL) {
   return mintReactorToken({
+    model,
     bindSessionIds: [sessionId],
     maxSessions: 1,
     maxSessionDurationSeconds: 60,
@@ -73,8 +76,9 @@ export function mintAttachToken(sessionId: string) {
  * The server creates the channel session, so no browser tab owns it: the SDK ends a session
  * when its creating client unloads, and a director tab closing must not take the broadcast down.
  */
-export async function createChannelSession() {
+export async function createChannelSession(model: string = ORBIS_MODEL) {
   const { jwt } = await mintReactorToken({
+    model,
     maxSessions: 1,
     maxSessionDurationSeconds: CHANNEL_SESSION_SECONDS,
     expiresAfterSeconds: 300,
@@ -82,7 +86,7 @@ export async function createChannelSession() {
   const response = await fetch(`${REACTOR_API_URL}/sessions`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${jwt}` },
-    body: JSON.stringify({ model: { name: ORBIS_MODEL } }),
+    body: JSON.stringify({ model: { name: model } }),
     cache: "no-store",
   });
   const text = await response.text();

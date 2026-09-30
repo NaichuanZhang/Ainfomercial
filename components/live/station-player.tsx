@@ -3,9 +3,10 @@
 import { ReactorProvider, ReactorView, useReactor } from "@reactor-team/js-sdk";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { type HostApi, HostStrip } from "@/components/live/host-strip";
 import { directorCall, type DirectorApi, useDirector } from "@/hooks/use-director";
 import { ORBIS_TRACKS } from "@/lib/orbis";
-import { type ChannelState, ORBIS_MODEL } from "@/lib/station-types";
+import { type Campaign, type ChannelState, ORBIS_MODEL } from "@/lib/station-types";
 
 type Ticket = { role: "director" | "viewer"; jwt: string; sessionId: string | null };
 
@@ -46,11 +47,15 @@ async function fetchTicket(clientId: string) {
  */
 export function StationPlayer({
   channel,
+  airing,
   onDirector,
+  onHost,
   children,
 }: {
   channel: ChannelState | null;
+  airing?: Campaign | null;
   onDirector?: (api: DirectorApi | null) => void;
+  onHost?: (api: HostApi | null) => void;
   children?: React.ReactNode;
 }) {
   const clientId = useClientId();
@@ -60,6 +65,14 @@ export function StationPlayer({
   const [waiting, setWaiting] = useState(false);
   const [error, setError] = useState("");
   const [muted, setMuted] = useState(false);
+  const [voiceMuted, setVoiceMuted] = useState(false);
+  const hostRef = useRef<HostApi | null>(null);
+  const onHostRef = useRef(onHost);
+  onHostRef.current = onHost;
+  const receiveHost = useCallback((api: HostApi | null) => {
+    hostRef.current = api;
+    onHostRef.current?.(api);
+  }, []);
 
   const tune = useCallback(async () => {
     if (!clientId) return;
@@ -157,12 +170,21 @@ export function StationPlayer({
 
       {children}
 
+      <HostStrip
+        active={tuned && !!ticket}
+        muted={voiceMuted}
+        channel={channel}
+        airing={airing ?? null}
+        onHost={receiveHost}
+      />
+
       {!tuned && (
         <div className="tune-in">
           <button
             type="button"
             className="btn primary big"
             onClick={() => {
+              hostRef.current?.unlock();
               setTuned(true);
               void tune();
             }}
@@ -179,7 +201,10 @@ export function StationPlayer({
       {tuned && ticket && (
         <div className="player-controls">
           <button type="button" className="chip" onClick={() => setMuted((m) => !m)}>
-            {muted ? "🔇 Unmute" : "🔊 Mute"}
+            {muted ? "🔇 Unmute picture" : "🔊 Mute picture"}
+          </button>
+          <button type="button" className="chip" onClick={() => setVoiceMuted((m) => !m)}>
+            {voiceMuted ? "🔇 Unmute host" : "🎙 Mute host"}
           </button>
           <span className="chip ghost" title="This tab drives the shared broadcast">
             {role === "director" ? "Control room" : "Viewer"}

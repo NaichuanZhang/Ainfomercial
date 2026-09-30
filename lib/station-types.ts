@@ -20,6 +20,10 @@ export type Campaign = {
   facts: CampaignFact[];
   beats: string[];
   audio_prompt: string | null;
+  /** What the AI host says when the product comes on air (<= 1200 chars, speakable text). */
+  host_script: string | null;
+  /** The script split into scene-beat-aligned spoken lines. */
+  host_lines: string[];
   bid_per_min: number;
   budget: number;
   spent: number;
@@ -61,7 +65,7 @@ export type ChatMessage = {
 };
 
 export const CAMPAIGN_PUBLIC_COLUMNS =
-  "id,brand,product_name,tagline,image_url,staged_image_url,price,compare_at_price,look,taste,facts,beats,audio_prompt,bid_per_min,budget,spent,airtime_seconds,status,created_at,updated_at";
+  "id,brand,product_name,tagline,image_url,staged_image_url,price,compare_at_price,look,taste,facts,beats,audio_prompt,host_script,host_lines,bid_per_min,budget,spent,airtime_seconds,status,created_at,updated_at";
 
 export const CHANNEL_PUBLIC_COLUMNS =
   "id,status,session_id,airing_campaign_id,segment_started_at,segment_ends_at,beat_index,current_prompt,airtime_day,airtime_seconds_day,updated_at";
@@ -78,3 +82,7 @@ export const ORBIS_MODEL = "reactor/visko-orbis-stable";
 
 /** The on-air host persona. */
 export const HOST_NAME = "Max Marquee";
+/** Storage key (bucket product-images) of the fictional host portrait. */
+export const HOST_IMAGE_KEY = "demo/host.png";
+/** Longest host script the campaigns.host_script column accepts. */
+export const HOST_SCRIPT_MAX_CHARS = 1200;
