@@ -74,13 +74,15 @@ export function ChatPanel({ messages, viewers }: { messages: ChatMessage[]; view
         }}
       >
         {messages.length === 0 && <li className="chat-empty">Ask the host anything about what&apos;s on air.</li>}
-        {messages.map((message) => (
+        {messages
+          .filter((message) => !(message.kind === "system" && message.reply_to !== null))
+          .map((message) => (
           <li key={message.id} className={`chat-msg ${message.kind}`}>
             {message.kind === "host" && <span className="host-badge">Host</span>}
             <span className="chat-author">{message.kind === "system" ? "📺" : message.author}</span>{" "}
             <span className="chat-body">{message.body}</span>
           </li>
-        ))}
+          ))}
       </ol>
       <form className="chat-form" onSubmit={send}>
         <label className="sr-only" htmlFor="chat-handle">

@@ -1,8 +1,12 @@
+import { after } from "next/server";
+
+import { runHostAnswers } from "@/lib/server/host-runner";
 import { getAdminClient } from "@/lib/server/insforge-admin";
 import { clientIp, rateLimited } from "@/lib/server/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 const clean = (value: unknown, max: number) =>
   typeof value === "string" ? value.replace(/[\u0000-\u001f\u007f]/g, " ").trim().slice(0, max) : "";
@@ -31,5 +35,7 @@ export async function POST(request: Request) {
     ])
     .select("*");
   if (inserted.error) return Response.json({ error: inserted.error.message }, { status: 502 });
+  // The host answers after the response is sent, so posting stays instant.
+  after(() => runHostAnswers().catch((error) => console.warn("host answer failed", error)));
   return Response.json({ message: inserted.data?.[0] ?? null });
 }

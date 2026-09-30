@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { BroadcastOverlay } from "@/components/live/broadcast-overlay";
 import { ChatPanel } from "@/components/live/chat-panel";
@@ -13,6 +13,22 @@ import { useStation } from "@/hooks/use-station";
 export function LiveChannel() {
   const station = useStation({ countViewers: true });
   const [director, setDirector] = useState<DirectorApi | null>(null);
+  // The director tab re-stages the shared video for each fresh host answer.
+  const cued = useRef<number | null>(null);
+  useEffect(() => {
+    const latest = [...station.chat].reverse().find((m) => m.kind === "host");
+    if (!latest) return;
+    if (cued.current === null) {
+      cued.current = latest.id; // history on load is not news
+      return;
+    }
+    if (latest.id <= cued.current) return;
+    cued.current = latest.id;
+    if (director && latest.visual_prompt && Date.now() - Date.parse(latest.created_at) < 20_000) {
+      director.cue(latest.visual_prompt);
+    }
+  }, [director, station.chat]);
+
   const lastHost = [...station.chat].reverse().find((m) => m.kind === "host" && m.fact_label);
   const highlight =
     lastHost && Date.now() - Date.parse(lastHost.created_at) < 12_000 ? lastHost.fact_label : null;

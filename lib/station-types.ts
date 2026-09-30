@@ -75,3 +75,6 @@ export const LEASE_TTL_SECONDS = 15;
 export const LEASE_RENEW_MS = 5_000;
 
 export const ORBIS_MODEL = "reactor/visko-orbis-stable";
+
+/** The on-air host persona. */
+export const HOST_NAME = "Max Marquee";
