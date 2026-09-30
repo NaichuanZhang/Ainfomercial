@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { LandingStatus } from "@/components/landing-status";
 import { TopBar } from "@/components/top-bar";
 
 export default function Landing() {
@@ -25,8 +26,13 @@ export default function Landing() {
             <Link className="btn" href="/console">
               Buy airtime
             </Link>
+            <Link className="btn" href="/console/insights">
+              See the analytics
+            </Link>
           </div>
         </section>
+
+        <LandingStatus />
 
         <section className="steps" aria-label="How it works">
           <div className="card">

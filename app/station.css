@@ -843,3 +843,39 @@ a {
   color: #ff9b9b;
   font-size: 0.85rem;
 }
+
+/* ---------- landing status ---------- */
+.landing-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.landing-feature {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 12px;
+  min-width: 220px;
+}
+
+.landing-feature img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.landing-feature p {
+  margin: 0 0 2px;
+  font-size: 0.8rem;
+}
+
+.landing-bids {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
