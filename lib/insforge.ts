@@ -14,3 +14,5 @@ export function getBrowserClient() {
 let cached: ReturnType<typeof createClient> | undefined;
 
 export const STATION_CHANNEL = "station:main";
+/** Presence-only room joined by /live tabs, so the viewer count excludes the console. */
+export const VIEWERS_CHANNEL = "station:viewers";

@@ -11,7 +11,7 @@ import type { DirectorApi } from "@/hooks/use-director";
 import { useStation } from "@/hooks/use-station";
 
 export function LiveChannel() {
-  const station = useStation();
+  const station = useStation({ countViewers: true });
   const [director, setDirector] = useState<DirectorApi | null>(null);
   const lastHost = [...station.chat].reverse().find((m) => m.kind === "host" && m.fact_label);
   const highlight =

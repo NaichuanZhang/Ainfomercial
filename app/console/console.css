@@ -1,0 +1,404 @@
+.console {
+  padding-top: 28px;
+}
+
+.console-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.console-head h1 {
+  margin: 0 0 6px;
+  font-family: var(--display);
+  font-size: clamp(2rem, 4vw, 3rem);
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+.console-head p {
+  max-width: 640px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.console-nav {
+  display: flex;
+  gap: 8px;
+}
+
+.console-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr);
+  align-items: start;
+  gap: 20px;
+}
+
+@media (max-width: 900px) {
+  .console-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .console-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-card {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+
+.form-head h2,
+.done-card h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.form-card label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.form-card label > span,
+.form-card legend {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.form-card input,
+.form-card textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #0d1026;
+  resize: vertical;
+}
+
+.form-card input:focus,
+.form-card textarea:focus,
+.dropzone:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 1px;
+}
+
+.form-card fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.upload-row {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 560px) {
+  .upload-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dropzone {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  padding: 12px;
+  border: 2px dashed var(--line);
+  border-radius: var(--radius);
+  background: #0d1026;
+  color: var(--muted);
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.dropzone strong {
+  color: var(--ink);
+}
+
+.dropzone.has-image {
+  border-style: solid;
+  background: #fff;
+}
+
+.dropzone img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.upload-side {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.draft-steps {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+.draft-steps li.on {
+  color: var(--ink);
+}
+
+.draft-steps li.on::marker {
+  color: var(--gold);
+}
+
+.staged {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius);
+}
+
+.staged img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.staged span {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.65);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.grid-2 .span-2 {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 560px) {
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.facts,
+.beats {
+  display: grid;
+  gap: 8px;
+}
+
+.fact-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) 36px;
+  gap: 8px;
+}
+
+.beat-row {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 36px;
+  align-items: start;
+  gap: 8px;
+}
+
+.beat-row .rank {
+  margin-top: 10px;
+}
+
+.icon-btn {
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.facts > .btn,
+.beats > .btn {
+  justify-self: start;
+}
+
+.bid-box {
+  display: grid;
+  gap: 10px;
+  padding: 16px !important;
+  border: 1px solid var(--gold) !important;
+  border-radius: var(--radius);
+  background: rgba(255, 210, 63, 0.06);
+}
+
+.bid-box legend {
+  padding: 0 6px;
+  color: var(--gold) !important;
+}
+
+.bid-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+}
+
+.bid-controls input[type="range"] {
+  padding: 0;
+  accent-color: var(--gold);
+}
+
+.bid-number {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+}
+
+.bid-number input {
+  width: 96px;
+  font-size: 1.3rem;
+  font-weight: 800;
+  text-align: right;
+}
+
+.rank-hint {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.rank-hint.top {
+  color: var(--green);
+}
+
+.budget {
+  grid-template-columns: auto 140px auto;
+  align-items: center;
+}
+
+@media (max-width: 560px) {
+  .budget {
+    grid-template-columns: 1fr;
+  }
+}
+
+.notice {
+  margin: 0;
+  color: var(--gold);
+}
+
+.submit {
+  width: 100%;
+}
+
+.done-card {
+  gap: 12px;
+}
+
+.queue-pos {
+  margin: 0;
+  color: var(--green);
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.row-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* bid board */
+.board {
+  display: grid;
+  gap: 12px;
+  position: sticky;
+  top: 16px;
+}
+
+.board-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.board-head .eyebrow {
+  margin: 0;
+}
+
+.board-now {
+  display: grid;
+  gap: 8px;
+}
+
+.board-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.board-row {
+  display: grid;
+  grid-template-columns: auto 44px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #0d1026;
+  transition: transform 300ms ease;
+}
+
+.board-row.airing {
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  border-color: var(--red);
+}
+
+.board-row.mine {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px var(--gold);
+}
+
+.board-name {
+  display: grid;
+  min-width: 0;
+}
+
+.board-name strong,
+.board-name span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.board-name span {
+  font-size: 0.8rem;
+}
+
+.thumb {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.fine {
+  margin: 0;
+  font-size: 0.8rem;
+}

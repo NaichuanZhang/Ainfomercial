@@ -1,6 +1,6 @@
 .env.local
 .next/
-node_modules/
+node_modules
 npm-debug.log*
 *.tsbuildinfo
 .reactor-dev-sessions.json

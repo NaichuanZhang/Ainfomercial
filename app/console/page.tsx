@@ -1,14 +1,9 @@
-import { TopBar } from "@/components/top-bar";
+import { ConsoleApp } from "@/components/console/console-app";
+
+import "./console.css";
+
+export const metadata = { title: "A.Infomercial: Advertiser console" };
 
 export default function ConsolePage() {
-  return (
-    <>
-      <TopBar />
-      <main className="page">
-        <p className="eyebrow">Advertiser console</p>
-        <h1>Buy airtime</h1>
-        <p className="muted">Campaign upload and the live bid board are being wired up.</p>
-      </main>
-    </>
-  );
+  return <ConsoleApp />;
 }

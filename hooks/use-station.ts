@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { getBrowserClient, STATION_CHANNEL } from "@/lib/insforge";
+import { getBrowserClient, STATION_CHANNEL, VIEWERS_CHANNEL } from "@/lib/insforge";
 import {
   type Campaign,
   CAMPAIGN_PUBLIC_COLUMNS,
@@ -22,7 +22,7 @@ type CampaignEvent = Pick<
  * Everything the channel page shows that is not video: channel state, the bid queue, chat and
  * the viewer count. Initial load over REST, then realtime deltas on `station:main`.
  */
-export function useStation() {
+export function useStation({ countViewers = false }: { countViewers?: boolean } = {}) {
   const [channel, setChannel] = useState<ChannelState | null>(null);
   const [campaigns, setCampaigns] = useState<Record<string, Campaign>>({});
   const [chat, setChat] = useState<ChatMessage[]>([]);
@@ -88,12 +88,12 @@ export function useStation() {
     };
     type Presence = { member: { presenceId: string }; meta: { channel: string } };
     const onJoin = ({ member, meta }: Presence) => {
-      if (meta.channel !== STATION_CHANNEL) return;
+      if (meta.channel !== VIEWERS_CHANNEL) return;
       members.current.add(member.presenceId);
       setViewers(members.current.size);
     };
     const onLeave = ({ member, meta }: Presence) => {
-      if (meta.channel !== STATION_CHANNEL) return;
+      if (meta.channel !== VIEWERS_CHANNEL) return;
       members.current.delete(member.presenceId);
       setViewers(members.current.size);
     };
@@ -117,10 +117,15 @@ export function useStation() {
         return;
       }
       setConnected(true);
-      members.current = new Set(response.presence.members.map((m) => m.presenceId));
-      setViewers(members.current.size);
       // Anything that changed between the REST load and the subscription.
       void load();
+      // Only the channel page joins the viewers presence room, so console visitors don't count.
+      if (countViewers) {
+        const room = await realtime.subscribe(VIEWERS_CHANNEL);
+        if (cancelled || !room.ok) return;
+        members.current = new Set(room.presence.members.map((m) => m.presenceId));
+        setViewers(members.current.size);
+      }
     })();
 
     return () => {
@@ -133,8 +138,9 @@ export function useStation() {
       realtime.off("connect", onConnect);
       realtime.off("disconnect", onDisconnect);
       realtime.unsubscribe(STATION_CHANNEL);
+      if (countViewers) realtime.unsubscribe(VIEWERS_CHANNEL);
     };
-  }, []);
+  }, [countViewers]);
 
   const airing = channel?.airing_campaign_id ? (campaigns[channel.airing_campaign_id] ?? null) : null;
 
