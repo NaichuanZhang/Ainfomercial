@@ -38,15 +38,15 @@ export function BidBoard({
   return (
     <aside className="card board" aria-label="Live bid board">
       <div className="board-head">
-        <p className="eyebrow">Live bid board</p>
+        <h2>Live bid board</h2>
         <span className="live-pill">Open auction</span>
       </div>
 
       <div className="board-now">
-        <span className="muted">On air</span>
+        <span className="board-label">On air</span>
         {airing ? (
           <div className="board-row airing">
-            <Thumb campaign={airing} />
+            <Thumb campaign={airing} live />
             <div className="board-name">
               <strong>{airing.product_name}</strong>
               <span className="muted">
@@ -60,7 +60,7 @@ export function BidBoard({
         )}
       </div>
 
-      <span className="muted">Up next (highest bid airs first)</span>
+      <span className="board-label">Up next (highest bid airs first)</span>
       {queue.length === 0 ? (
         <p className="muted">Queue is empty. The next bid airs next.</p>
       ) : (
@@ -97,11 +97,15 @@ export function BidBoard({
   );
 }
 
-function Thumb({ campaign }: { campaign: Campaign }) {
-  return campaign.image_url ? (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img className="thumb" src={campaign.image_url} alt="" />
-  ) : (
-    <span className="thumb" />
+function Thumb({ campaign, live }: { campaign: Campaign; live?: boolean }) {
+  return (
+    <span className={`avatar avatar-30 thumb${live ? " ring-live" : ""}`}>
+      {campaign.image_url ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={campaign.image_url} alt="" />
+      ) : (
+        <span className="avatar-letter">{campaign.product_name.slice(0, 1)}</span>
+      )}
+    </span>
   );
 }

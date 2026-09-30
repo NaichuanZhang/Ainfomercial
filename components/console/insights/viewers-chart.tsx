@@ -170,7 +170,7 @@ export function ViewersChart({
             <g key={m.t} className="ins-marker">
               <title>{`${fmtClock(m.t)} · ${m.question}`}</title>
               <line x1={x(m.t)} x2={x(m.t)} y1={y(m.viewers)} y2={mt + plotH} stroke={PALETTE.gold} strokeOpacity={0.55} strokeDasharray="2 3" />
-              <circle cx={x(m.t)} cy={y(m.viewers)} r={narrow ? 8 : 9} fill={PALETTE.gold} stroke="#0a0c18" strokeWidth={2} />
+              <circle cx={x(m.t)} cy={y(m.viewers)} r={narrow ? 8 : 9} fill={PALETTE.gold} stroke="#18181b" strokeWidth={2} />
               <text x={x(m.t)} y={y(m.viewers) + 3.5} textAnchor="middle" className="ins-marker-num">
                 {i + 1}
               </text>

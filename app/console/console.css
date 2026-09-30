@@ -1,5 +1,9 @@
+/* Advertiser console: creator-dashboard look on the station tokens. */
+
 .console {
-  padding-top: 28px;
+  display: grid;
+  gap: 20px;
+  padding-top: 24px;
 }
 
 .console-head {
@@ -7,25 +11,29 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 24px;
-  margin-bottom: 20px;
+}
+
+.console-head-text {
+  display: grid;
+  gap: 4px;
 }
 
 .console-head h1 {
-  margin: 0 0 6px;
-  font-family: var(--display);
-  font-size: clamp(2rem, 4vw, 3rem);
-  letter-spacing: 0.01em;
-  text-transform: uppercase;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .console-head p {
   max-width: 640px;
   margin: 0;
+  font-size: 13px;
   line-height: 1.5;
 }
 
 .console-nav {
   display: flex;
+  flex: none;
   gap: 8px;
 }
 
@@ -41,51 +49,97 @@
     flex-direction: column;
     align-items: flex-start;
   }
+
   .console-grid {
     grid-template-columns: 1fr;
   }
 }
 
+/* ---------- form card ---------- */
 .form-card {
   display: grid;
   gap: 18px;
   min-width: 0;
 }
 
+.form-head {
+  display: grid;
+  gap: 2px;
+}
+
+.form-head .eyebrow {
+  margin: 0;
+}
+
 .form-head h2,
 .done-card h2 {
-  margin: 0;
-  font-size: 1.5rem;
+  font-size: 18px;
+  font-weight: 700;
 }
 
 .form-card label {
   display: grid;
-  gap: 6px;
+  gap: 5px;
   min-width: 0;
 }
 
 .form-card label > span,
 .form-card legend {
-  color: var(--muted);
-  font-size: 0.85rem;
-  font-weight: 700;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.form-card legend .muted {
+  font-weight: 400;
 }
 
 .form-card input,
 .form-card textarea {
   width: 100%;
   min-width: 0;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: #0d1026;
+  padding: 6px 10px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius);
+  background: var(--interact);
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.5;
   resize: vertical;
+  outline: none;
+}
+
+.form-card input:not([type="range"]) {
+  height: 30px;
+  padding: 0 10px;
+}
+
+.form-card input.sr-only {
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+}
+
+.form-card input::placeholder,
+.form-card textarea::placeholder {
+  color: var(--muted);
+}
+
+.form-card input:hover,
+.form-card textarea:hover {
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .form-card input:focus,
-.form-card textarea:focus,
+.form-card textarea:focus {
+  border-color: var(--purple-fill);
+  background: #000;
+  box-shadow: inset 0 0 0 1px var(--purple-fill);
+}
+
 .dropzone:focus-visible {
-  outline: 2px solid var(--gold);
+  outline: 2px solid var(--purple-fill);
   outline-offset: 1px;
 }
 
@@ -106,6 +160,10 @@
   .upload-row {
     grid-template-columns: 1fr;
   }
+
+  .dropzone {
+    aspect-ratio: 16 / 9;
+  }
 }
 
 .dropzone {
@@ -113,12 +171,18 @@
   place-items: center;
   aspect-ratio: 1;
   padding: 12px;
-  border: 2px dashed var(--line);
-  border-radius: var(--radius);
-  background: #0d1026;
+  border: 2px dashed var(--line-2);
+  border-radius: var(--radius-l);
+  background: var(--raised);
   color: var(--muted);
+  font-size: 13px;
   line-height: 1.5;
   cursor: pointer;
+}
+
+.dropzone:hover {
+  border-color: var(--purple-fill);
+  background: var(--hover);
 }
 
 .dropzone strong {
@@ -142,11 +206,15 @@
   gap: 10px;
 }
 
+.upload-side > .btn {
+  justify-self: start;
+}
+
 .draft-steps {
   margin: 0;
   padding-left: 18px;
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 13px;
   line-height: 1.7;
 }
 
@@ -155,13 +223,13 @@
 }
 
 .draft-steps li.on::marker {
-  color: var(--gold);
+  color: var(--purple-light);
 }
 
 .staged {
   position: relative;
   overflow: hidden;
-  border-radius: var(--radius);
+  border-radius: var(--radius-l);
 }
 
 .staged img {
@@ -175,11 +243,11 @@
   position: absolute;
   bottom: 10px;
   left: 10px;
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 2px 6px;
+  border-radius: var(--radius);
   background: rgba(0, 0, 0, 0.65);
-  font-size: 0.8rem;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .grid-2 {
@@ -206,29 +274,35 @@
 
 .fact-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) 36px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) 30px;
   gap: 8px;
 }
 
 .beat-row {
   display: grid;
-  grid-template-columns: 24px minmax(0, 1fr) 36px;
+  grid-template-columns: 22px minmax(0, 1fr) 30px;
   align-items: start;
   gap: 8px;
 }
 
 .beat-row .rank {
-  margin-top: 10px;
+  margin-top: 6px;
 }
 
-.icon-btn {
-  height: 40px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: transparent;
-  color: var(--muted);
-  font-size: 1.2rem;
-  cursor: pointer;
+.icon-btn.remove,
+.form-card .icon-btn {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--interact);
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1;
+}
+
+.form-card .icon-btn:hover {
+  background: var(--interact-hover);
 }
 
 .facts > .btn,
@@ -239,15 +313,15 @@
 .bid-box {
   display: grid;
   gap: 10px;
-  padding: 16px !important;
-  border: 1px solid var(--gold) !important;
+  padding: 14px 16px !important;
+  border: 1px solid var(--purple-fill) !important;
   border-radius: var(--radius);
-  background: rgba(255, 210, 63, 0.06);
+  background: var(--purple-dim);
 }
 
 .bid-box legend {
   padding: 0 6px;
-  color: var(--gold) !important;
+  color: var(--purple-light) !important;
 }
 
 .bid-controls {
@@ -258,8 +332,15 @@
 }
 
 .bid-controls input[type="range"] {
+  height: auto;
   padding: 0;
-  accent-color: var(--gold);
+  border: 0;
+  background: transparent;
+  accent-color: var(--purple);
+}
+
+.bid-controls input[type="range"]:focus {
+  box-shadow: none;
 }
 
 .bid-number {
@@ -269,16 +350,16 @@
 }
 
 .bid-number input {
-  width: 96px;
-  font-size: 1.3rem;
-  font-weight: 800;
+  width: 90px;
+  font-size: 16px;
+  font-weight: 700;
   text-align: right;
 }
 
 .rank-hint {
   margin: 0;
   color: var(--muted);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .rank-hint.top {
@@ -286,7 +367,7 @@
 }
 
 .budget {
-  grid-template-columns: auto 140px auto;
+  grid-template-columns: auto 130px auto;
   align-items: center;
 }
 
@@ -298,7 +379,7 @@
 
 .notice {
   margin: 0;
-  color: var(--gold);
+  color: var(--warn);
 }
 
 .submit {
@@ -312,8 +393,8 @@
 .queue-pos {
   margin: 0;
   color: var(--green);
-  font-size: 1.2rem;
-  font-weight: 800;
+  font-size: 16px;
+  font-weight: 700;
 }
 
 .row-actions {
@@ -321,22 +402,32 @@
   gap: 10px;
 }
 
-/* bid board */
+/* ---------- bid board ---------- */
 .board {
   display: grid;
   gap: 12px;
   position: sticky;
-  top: 16px;
+  top: calc(var(--nav-h) + 16px);
 }
 
 .board-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
 }
 
-.board-head .eyebrow {
-  margin: 0;
+.board-head h2 {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.board-label {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
 .board-now {
@@ -344,9 +435,14 @@
   gap: 8px;
 }
 
+.board-now p,
+.board p.muted {
+  margin: 0;
+}
+
 .board-list {
   display: grid;
-  gap: 8px;
+  gap: 4px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -354,29 +450,33 @@
 
 .board-row {
   display: grid;
-  grid-template-columns: auto 44px minmax(0, 1fr) auto auto;
+  grid-template-columns: auto 30px minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 10px;
-  padding: 8px 10px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: #0d1026;
-  transition: transform 300ms ease;
+  padding: 5px 8px;
+  border-radius: var(--radius);
+  background: transparent;
+  transition: background-color 120ms ease;
+}
+
+.board-row:hover {
+  background: var(--hover);
 }
 
 .board-row.airing {
-  grid-template-columns: 44px minmax(0, 1fr) auto;
-  border-color: var(--red);
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  background: var(--raised);
 }
 
 .board-row.mine {
-  border-color: var(--gold);
-  box-shadow: 0 0 0 1px var(--gold);
+  box-shadow: inset 0 0 0 1px var(--purple-fill);
+  background: var(--purple-dim);
 }
 
 .board-name {
   display: grid;
   min-width: 0;
+  line-height: 1.3;
 }
 
 .board-name strong,
@@ -386,19 +486,16 @@
   white-space: nowrap;
 }
 
-.board-name span {
-  font-size: 0.8rem;
+.board-name strong {
+  font-size: 14px;
+  font-weight: 600;
 }
 
-.thumb {
-  width: 44px;
-  height: 44px;
-  object-fit: contain;
-  border-radius: 6px;
-  background: #fff;
+.board-name span {
+  font-size: 13px;
 }
 
 .fine {
   margin: 0;
-  font-size: 0.8rem;
+  font-size: 12px;
 }

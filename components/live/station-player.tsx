@@ -4,6 +4,7 @@ import { ReactorProvider, ReactorView, useReactor } from "@reactor-team/js-sdk";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { type HostApi, HostStrip } from "@/components/live/host-strip";
+import { Icon } from "@/components/shell/icons";
 import { directorCall, type DirectorApi, useDirector } from "@/hooks/use-director";
 import { ORBIS_TRACKS } from "@/lib/orbis";
 import { type Campaign, type ChannelState, ORBIS_MODEL } from "@/lib/station-types";
@@ -180,19 +181,26 @@ export function StationPlayer({
 
       {!tuned && (
         <div className="tune-in">
-          <button
-            type="button"
-            className="btn primary big"
-            onClick={() => {
-              hostRef.current?.unlock();
-              setTuned(true);
-              void tune();
-            }}
-            disabled={!clientId}
-          >
-            ▶ Tune in
-          </button>
-          <p>Live AI-generated video with sound. Nothing is pre-recorded.</p>
+          <div className="tune-in-card">
+            <span className="tune-in-live" aria-hidden="true">
+              <span className={channel?.status === "live" ? "dot live" : "dot"} />
+              {channel?.status === "live" ? "Live now" : channel?.status === "bumper" ? "Coming up next" : "Standing by"}
+            </span>
+            <button
+              type="button"
+              className="btn primary big tune-in-btn"
+              onClick={() => {
+                hostRef.current?.unlock();
+                setTuned(true);
+                void tune();
+              }}
+              disabled={!clientId}
+            >
+              <Icon.Play />
+              Tune in
+            </button>
+            <p>Live AI-generated video with sound. Nothing is pre-recorded.</p>
+          </div>
         </div>
       )}
       {tuned && waiting && <div className="player-note">Warming up the studio…</div>}
@@ -200,13 +208,17 @@ export function StationPlayer({
 
       {tuned && ticket && (
         <div className="player-controls">
-          <button type="button" className="chip" onClick={() => setMuted((m) => !m)}>
-            {muted ? "🔇 Unmute picture" : "🔊 Mute picture"}
+          <button type="button" className="player-btn" onClick={() => setMuted((m) => !m)}>
+            <Icon.Speaker muted={muted} />
+            <span>{muted ? "Unmute picture" : "Mute picture"}</span>
           </button>
-          <button type="button" className="chip" onClick={() => setVoiceMuted((m) => !m)}>
-            {voiceMuted ? "🔇 Unmute host" : "🎙 Mute host"}
+          <button type="button" className="player-btn" onClick={() => setVoiceMuted((m) => !m)}>
+            <Icon.Mic muted={voiceMuted} />
+            <span>{voiceMuted ? "Unmute host" : "Mute host"}</span>
           </button>
-          <span className="chip ghost" title="This tab drives the shared broadcast">
+          <span className="player-controls-spacer" />
+          <span className="player-role" title="This tab drives the shared broadcast">
+            {role === "director" ? <Icon.Video size={16} /> : <Icon.Person size={16} />}
             {role === "director" ? "Control room" : "Viewer"}
           </span>
         </div>
