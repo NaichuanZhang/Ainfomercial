@@ -88,12 +88,12 @@ export function useContainerWidth<T extends HTMLElement>(fallback = 900) {
 
 /** Chart palette (matches the station tokens). */
 export const PALETTE = {
-  gold: "#ffd23f",
-  cyan: "#3fd6ff",
-  green: "#41e28a",
-  red: "#ff3d3d",
-  violet: "#b48cff",
-  muted: "#9aa1c8",
-  line: "#2a3163",
-  ink: "#f6f3e8",
+  gold: "#ffd37a",
+  cyan: "#a970ff",
+  green: "#00f593",
+  red: "#ff4f4d",
+  violet: "#bf94ff",
+  muted: "#adadb8",
+  line: "#3b3b44",
+  ink: "#efeff1",
 };

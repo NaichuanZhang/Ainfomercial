@@ -5,7 +5,8 @@ import { useState } from "react";
 
 import { BidBoard } from "@/components/console/bid-board";
 import { CampaignForm } from "@/components/console/campaign-form";
-import { TopBar } from "@/components/top-bar";
+import { AppShell } from "@/components/shell/app-shell";
+import { Icon } from "@/components/shell/icons";
 import { useStation } from "@/hooks/use-station";
 
 export function ConsoleApp() {
@@ -13,11 +14,10 @@ export function ConsoleApp() {
   const [mine, setMine] = useState<string | null>(null);
 
   return (
-    <>
-      <TopBar live={station.channel?.status === "live"} />
+    <AppShell live={station.channel?.status === "live"} airing={station.airing} queue={station.queue}>
       <main className="page console">
         <header className="console-head">
-          <div>
+          <div className="console-head-text">
             <p className="eyebrow">Advertiser console</p>
             <h1>Buy airtime on A.Infomercial</h1>
             <p className="muted">
@@ -30,6 +30,7 @@ export function ConsoleApp() {
               Insights
             </Link>
             <Link className="btn primary" href="/live">
+              <Icon.Play />
               Watch live
             </Link>
           </nav>
@@ -39,6 +40,6 @@ export function ConsoleApp() {
           <BidBoard airing={station.airing} queue={station.queue} highlightId={mine} />
         </div>
       </main>
-    </>
+    </AppShell>
   );
 }

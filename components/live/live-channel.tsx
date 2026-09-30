@@ -7,7 +7,8 @@ import { ChatPanel } from "@/components/live/chat-panel";
 import type { HostApi } from "@/components/live/host-strip";
 import { QueueRail } from "@/components/live/queue-rail";
 import { StationPlayer } from "@/components/live/station-player";
-import { TopBar } from "@/components/top-bar";
+import { StreamInfo } from "@/components/live/stream-info";
+import { AppShell } from "@/components/shell/app-shell";
 import type { DirectorApi } from "@/hooks/use-director";
 import { useStation } from "@/hooks/use-station";
 
@@ -38,38 +39,41 @@ export function LiveChannel() {
   const highlight =
     lastHost && Date.now() - Date.parse(lastHost.created_at) < 12_000 ? lastHost.fact_label : null;
 
+  const live = station.channel?.status === "live";
   return (
-    <div className="live-shell">
-      <TopBar live={station.channel?.status === "live"} />
-      <div className="live-grid">
-        <div className="live-main">
+    <AppShell live={live} airing={station.airing} queue={station.queue} className="shell-channel">
+      <div className="channel-page">
+        <div className="channel-main">
           <StationPlayer channel={station.channel} airing={station.airing} onDirector={setDirector} onHost={setHost}>
             <BroadcastOverlay channel={station.channel} airing={station.airing} highlightFact={highlight} />
           </StationPlayer>
-          <QueueRail airing={station.airing} queue={station.queue} />
-          {director && (
-            <details className="card control-room">
-              <summary>Control room (this tab is directing the broadcast)</summary>
-              {director.error && <p className="chat-error">{director.error}</p>}
-              {host?.error && <p className="chat-error">{host.error}</p>}
-              <ol>
-                {director.log.map((line, index) => (
-                  <li key={index}>{line}</li>
-                ))}
-              </ol>
-              {host && host.log.length > 0 && (
+          <StreamInfo channel={station.channel} airing={station.airing} viewers={station.viewers} />
+          <div className="channel-content">
+            <QueueRail live={live} airing={station.airing} queue={station.queue} />
+            {director && (
+              <details className="panel control-room">
+                <summary>Control room (this tab is directing the broadcast)</summary>
+                {director.error && <p className="chat-error">{director.error}</p>}
+                {host?.error && <p className="chat-error">{host.error}</p>}
                 <ol>
-                  {host.log.map((line, index) => (
+                  {director.log.map((line, index) => (
                     <li key={index}>{line}</li>
                   ))}
                 </ol>
-              )}
-            </details>
-          )}
-          {station.error && <p className="chat-error">{station.error}</p>}
+                {host && host.log.length > 0 && (
+                  <ol>
+                    {host.log.map((line, index) => (
+                      <li key={index}>{line}</li>
+                    ))}
+                  </ol>
+                )}
+              </details>
+            )}
+            {station.error && <p className="chat-error">{station.error}</p>}
+          </div>
         </div>
-        <ChatPanel messages={station.chat} viewers={station.viewers} />
+        <ChatPanel messages={station.chat} viewers={station.viewers} airing={station.airing} live={live} />
       </div>
-    </div>
+    </AppShell>
   );
 }

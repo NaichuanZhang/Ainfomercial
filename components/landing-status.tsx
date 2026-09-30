@@ -2,22 +2,33 @@
 
 import Link from "next/link";
 
-import { useStation } from "@/hooks/use-station";
+import type { Campaign, ChannelState } from "@/lib/station-types";
 
 /** Live strip on the landing page: what's on air (or up next) and the current top bids. */
-export function LandingStatus() {
-  const { channel, airing, queue } = useStation();
+export function LandingStatus({
+  channel,
+  airing,
+  queue,
+}: {
+  channel: ChannelState | null;
+  airing: Campaign | null;
+  queue: Campaign[];
+}) {
   const live = channel?.status === "live";
   const feature = airing ?? queue[0] ?? null;
   return (
-    <section className="card landing-status" aria-label="Channel status">
+    <section className="landing-status" aria-label="Channel status">
       <span className={live ? "live-pill" : "live-pill off"}>{live ? "On air now" : "Off air"}</span>
       {feature ? (
         <div className="landing-feature">
-          {feature.image_url && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={feature.image_url} alt="" />
-          )}
+          <span className={`avatar avatar-30 ${live ? "ring-live" : ""}`}>
+            {feature.image_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={feature.image_url} alt="" />
+            ) : (
+              <span className="avatar-letter">{feature.product_name.slice(0, 1)}</span>
+            )}
+          </span>
           <div>
             <p className="muted">{live ? "Now airing" : "Up next"}</p>
             <strong>{feature.product_name}</strong>

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 
-import { InsightsDashboard } from "@/components/console/insights/insights-dashboard";
-import { TopBar } from "@/components/top-bar";
+import { InsightsShell } from "@/components/console/insights/insights-shell";
 
 import "./insights.css";
 
@@ -11,10 +10,5 @@ export const metadata: Metadata = {
 };
 
 export default function InsightsPage() {
-  return (
-    <>
-      <TopBar />
-      <InsightsDashboard />
-    </>
-  );
+  return <InsightsShell />;
 }
