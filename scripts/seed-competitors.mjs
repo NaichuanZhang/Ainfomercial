@@ -25,18 +25,18 @@ const campaigns = [
       { label: "Sizes", value: "Men's 7-14, women's 5-12" },
     ],
     beats: [
-      "The white running shoe on a glossy black studio counter under a warm spotlight slowly rotates as the camera pushes in and the spotlight brightens.",
-      "The shoe's foam sole on the glossy black studio counter under a warm spotlight compresses and springs back, extreme close-up in slow motion.",
-      "Extreme macro of the knit mesh upper of the white shoe under the warm spotlight, light passing through the weave.",
-      "The white running shoe on the glossy black studio counter under a warm spotlight lifts a few inches and bounces softly back down, camera low.",
-      "Hero shot: the white running shoe on the glossy black studio counter under a warm spotlight, camera slowly orbits, studio lights twinkling behind.",
+      "The smiling host in the teal suit and gold tie gestures toward the white running shoe on the glossy black studio counter and talks excitedly to the camera, warm spotlight, slow push-in, medium shot.",
+      "The smiling host in the teal suit and gold tie presses his palm down on the shoe's thick foam sole and it springs back, close-up on the sole under the warm spotlight.",
+      "The smiling host in the teal suit and gold tie lifts the white running shoe and turns it slowly in the spotlight to show the knit mesh upper, medium close-up.",
+      "The smiling host in the teal suit and gold tie bends the shoe gently in both hands to show how flexible it is, nodding at the camera, static medium shot.",
+      "The smiling host in the teal suit and gold tie sets the shoe back on the counter and spreads his arms toward it, beaming, studio lights twinkling behind him, slow orbit.",
     ],
-    audio_prompt: "Upbeat retro 1990s TV shopping jingle with punchy drums and soft sneaker squeaks.",
+    audio_prompt: "Soft, low retro TV-shopping background music with soft sneaker squeaks.",
     bid_per_min: 22,
     budget: 1500,
     ...(() => {
       const p = img("cloudstep-packshot");
-      const s = img("cloudstep-studio");
+      const s = img("cloudstep-host");
       return { image_url: p.url, image_key: p.key, staged_image_url: s.url, staged_image_key: s.key };
     })(),
   },
@@ -54,18 +54,18 @@ const campaigns = [
       { label: "Serving", value: "1 cup (75 g)" },
     ],
     beats: [
-      "The black ramen cup on a glossy black studio counter under a warm spotlight glows neon orange as the camera pushes in slowly.",
-      "Boiling water pours into the ramen cup on the glossy black studio counter under a warm spotlight, steam curling upward.",
-      "Chopsticks lift springy wavy noodles out of the steaming cup under the warm spotlight, slow motion close-up.",
-      "Extreme macro of red chili oil swirling across the surface of the ramen broth, backlit by golden studio light.",
-      "Hero shot: the steaming black ramen cup on the glossy black studio counter under a warm spotlight, camera slowly orbits.",
+      "The smiling host in the teal suit and gold tie gestures toward the glossy black ramen cup on the studio counter and talks excitedly to the camera, steam rising under the warm spotlight, slow push-in.",
+      "The smiling host in the teal suit and gold tie pours boiling water from a kettle into the ramen cup on the counter, steam curling upward, medium close-up.",
+      "The smiling host in the teal suit and gold tie lifts springy wavy noodles out of the steaming cup with chopsticks and grins at the camera, slow motion, close-up.",
+      "Extreme macro of red chili oil swirling across the ramen broth in the cup on the counter, backlit by golden studio light.",
+      "The smiling host in the teal suit and gold tie takes a slurp of noodles and gives a thumbs-up to the camera, studio lights twinkling behind him, static medium shot.",
     ],
-    audio_prompt: "Upbeat retro 1990s TV shopping jingle with sizzling broth and bubbling water.",
+    audio_prompt: "Soft, low retro TV-shopping background music with bubbling water and a gentle slurp.",
     bid_per_min: 18,
     budget: 800,
     ...(() => {
       const p = img("glow-packshot");
-      const s = img("glow-studio");
+      const s = img("glow-host");
       return { image_url: p.url, image_key: p.key, staged_image_url: s.url, staged_image_key: s.key };
     })(),
   },

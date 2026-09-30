@@ -5,7 +5,7 @@
  * set_prompt). Plain fetch against OpenRouter and type-only imports, so it runs inside a Next.js
  * nodejs route handler and directly under `node` (see scripts/eval-host-answer.mjs).
  */
-import type { Campaign, CampaignFact, ChatMessage } from "@/lib/station-types";
+import { type Campaign, type CampaignFact, type ChatMessage, HOST_LOOK } from "@/lib/station-types";
 
 export type HostAnswerKind = "answer" | "deflect" | "ignore";
 
@@ -51,9 +51,9 @@ const SHEET_FIELD_MAX_CHARS = 400;
 const CONTROL_CHARS = /[\u0000-\u001f\u007f]/g;
 const NO_FACT = "none";
 
-/** Anything Orbis must never be asked to render: people, on-screen text, other brands. */
+/** Anything Orbis must never be asked to render: extra people, on-screen text, other brands. (The host himself is allowed.) */
 const VISUAL_DENYLIST =
-  /\b(face|faces|smile|smiling|eyes|lips|person|people|man|men|woman|women|boy|girl|child|children|kid|kids|host|hand|hands|finger|fingers|arm|arms|text|texts|letter|letters|word|words|number|numbers|digit|digits|numeral|numerals|logo|logos|caption|captions|subtitle|subtitles|font|typography|sign|signs|pepsi|sprite|fanta|dr\.? ?pepper|mountain dew|red bull|monster energy|gatorade|7 ?up|la ?croix|schweppes|canada dry)\b/i;
+  /\b(people|crowd|audience|woman|women|boy|girl|child|children|kid|kids|second person|another person|text|texts|letter|letters|word|words|number|numbers|digit|digits|numeral|numerals|logo|logos|caption|captions|subtitle|subtitles|font|typography|sign|signs|pepsi|sprite|fanta|dr\.? ?pepper|mountain dew|red bull|monster energy|gatorade|7 ?up|la ?croix|schweppes|canada dry)\b/i;
 
 const clean = (value: unknown, max: number) =>
   typeof value === "string" ? value.replace(CONTROL_CHARS, " ").replace(/\s+/g, " ").trim().slice(0, max) : "";
@@ -93,8 +93,8 @@ function buildSheet(campaign: Campaign): Sheet {
     .filter(Boolean)
     .slice(0, 6);
 
-  const anchorShort = "the chilled product, the glossy black counter, the warm spotlight";
-  const anchor = `${product}${look ? ` (${look.replace(/[.\s]+$/, "")})` : ""} sits chilled on a glossy black studio counter under a single warm spotlight, condensation beading on it, studio lights twinkling softly in the dark behind it.`;
+  const anchorShort = "the host in the teal suit, the product, the glossy black counter, the warm spotlight";
+  const anchor = `${HOST_LOOK} stands behind a glossy black studio counter under a warm spotlight presenting ${product}${look ? ` (${look.replace(/[.\s]+$/, "")})` : ""}, blue and gold studio lights twinkling behind him.`;
 
   const lines = [
     `You are the on-air host of A.Infomercial, a live AI-generated retro home-shopping TV channel. Right now you are presenting ${product} by ${brand}. Viewers type questions in the chat; you answer out loud in an upbeat 1990s TV-shopping-host voice and steer the live video so the picture shows your answer.`,
@@ -125,11 +125,11 @@ function buildSheet(campaign: Campaign): Sheet {
     `factLabel: the one sheet fact the on-screen card should highlight, spelled exactly as in Facts (${labels.length ? labels.map((label) => `"${label}"`).join(", ") : "none available"}), or "${NO_FACT}" when no fact fits. Price, tagline, look and taste are not facts.`,
     "",
     `visualPrompt (only when kind is "answer"; "" otherwise): at most ${VISUAL_MAX_WORDS} words steering a real-time video model that is already showing the stage anchors.`,
-    `- Keep the anchors (${anchorShort}) and name them with short physical nouns, for example "the chilled silver can", "the glossy black counter", "the warm spotlight". Never paste the Look text or sheet values into it, no parentheses. Do not re-describe the studio.`,
-    "- Exactly ONE present-tense physical action that visually demonstrates THIS answer, not a generic hero shot. Ideas: zero calories or zero sugar: a single white feather drifts down and settles on the rim of the can. Caffeine or energy: cola pours into a tall glass and the fizz races upward as the spotlight snaps brighter. Sweetener or taste: the can tips and pours dark cola into a glass of ice, bubbles rising. Size: the camera tilts slowly down the full height of the can. Price or pack: identical cans slide in beside the first until a neat row fills the counter. Served with ice: ice cubes tumble around the can, cold mist rolling across the counter. Concrete nouns and verbs only; no sequences of actions; no adjectives of intent such as cinematic or dynamic.",
+    `- Keep the anchors (${anchorShort}) and name them with short physical nouns, for example "the host in the teal suit", "the silver can", "the glossy black counter", "the warm spotlight". Never paste the Look text or sheet values into it, no parentheses. Do not re-describe the studio.`,
+    "- Exactly ONE present-tense physical action by the host (or of the product) that visually demonstrates THIS answer, not a generic hero shot. Ideas: taste: the host pours the cola into a tall glass of ice, takes a sip and nods happily. Zero calories or zero sugar: the host holds the can up beside his face and gives a big thumbs-up. Caffeine or energy: the host cracks the can open and fizz sprays up in the spotlight. Size: the host holds the can out toward the camera at arm's length. Price or pack: the host sets a row of identical cans on the counter one by one. Served with ice: the host drops ice cubes into a glass beside the can, cold mist rolling across the counter. Concrete nouns and verbs only; no sequences of more than one action; no adjectives of intent such as cinematic or dynamic.",
     "- Finish with a camera direction: motion (static, slow push-in, slow orbit, tilt, pan), framing (macro, close-up, medium shot) and depth of field.",
-    "- Photorealistic studio product shot matching the current scene. Never any people, faces, hands or body parts; never text, letters, digits, numbers, logos, captions or signs; never other brands or products. Write quantities in words or leave them out. Describe what IS in the frame, never what is absent (avoid the words no, not, without).",
-    '- Example: "The chilled silver can tips and pours dark cola into a tall glass of ice on the glossy black counter, fizz racing up the glass under the warm spotlight. Slow push-in, eye-level, shallow depth of field."',
+    "- Photorealistic live TV studio shot matching the current scene. The host is the only person in the frame; never add anyone else. Never text, letters, digits, numbers, logos, captions or signs; never other brands or products. Write quantities in words or leave them out. Describe what IS in the frame, never what is absent (avoid the words no, not, without).",
+    '- Example: "The host in the teal suit pours the silver can of cola into a tall glass of ice on the glossy black counter, takes a sip and nods, grinning at the camera under the warm spotlight. Slow push-in, medium shot, shallow depth of field."',
   ];
 
   return {

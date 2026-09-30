@@ -78,3 +78,8 @@ export const ORBIS_MODEL = "reactor/visko-orbis-stable";
 
 /** The on-air host persona. */
 export const HOST_NAME = "Max Marquee";
+/** How Orbis should draw him: the host is part of the live picture, identity-locked by the start frame. */
+export const HOST_LOOK =
+  "the smiling host in his fifties with swept-back dark hair, a teal suit, white shirt and gold tie";
+/** Reference photo composited into every product's start frame. */
+export const HOST_IMAGE_KEY = "demo/host.png";

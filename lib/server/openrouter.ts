@@ -61,12 +61,13 @@ export async function chatJson<T>(
 export async function generateImage(
   model: string,
   prompt: string,
-  options: { inputImageDataUrl?: string; aspectRatio?: string; timeoutMs?: number } = {},
+  options: { inputImageDataUrl?: string; inputImageDataUrls?: string[]; aspectRatio?: string; timeoutMs?: number } = {},
 ) {
-  const content: Content = options.inputImageDataUrl
+  const inputs = options.inputImageDataUrls ?? (options.inputImageDataUrl ? [options.inputImageDataUrl] : []);
+  const content: Content = inputs.length
     ? [
-        { type: "image_url", image_url: { url: options.inputImageDataUrl } },
-        { type: "text", text: prompt },
+        ...inputs.map((url) => ({ type: "image_url" as const, image_url: { url } })),
+        { type: "text" as const, text: prompt },
       ]
     : prompt;
   const result = await post(
