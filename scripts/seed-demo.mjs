@@ -27,9 +27,9 @@ const campaign = {
     { label: "Size", value: "12 fl oz (355 mL) can" },
   ],
   beats: [
-    "The smiling host in the teal suit and gold tie holds the silver Diet Coke can up beside his face behind the glossy black studio counter and talks excitedly to the camera, warm spotlight, slow push-in, medium shot.",
+    "The smiling host in the teal suit and gold tie holds the silver Diet Coke can up beside his face behind the glossy black studio counter and beams at the camera with raised eyebrows, warm spotlight, slow push-in, medium shot.",
     "The smiling host in the teal suit and gold tie cracks open the silver can and pours cola into a tall glass of ice on the glossy black counter, fizz racing up the glass, medium close-up.",
-    "The smiling host in the teal suit and gold tie lifts the glass, takes a sip and nods with a big grin, talking to the camera under the warm spotlight, static medium shot.",
+    "The smiling host in the teal suit and gold tie lifts the glass, raises it in a toast and nods with a big closed-mouth grin, grinning at the camera under the warm spotlight, static medium shot.",
     "Close-up of the frosty silver can on the glossy black counter beside the glass of fizzing cola as the host's hand sets it down, bubbles rising, shallow depth of field.",
     "The smiling host in the teal suit and gold tie spreads his arms toward the can and the glass on the counter, beaming at the camera, studio lights twinkling behind him, slow orbit.",
   ],

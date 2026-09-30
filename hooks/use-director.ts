@@ -7,7 +7,9 @@ import { type OrbisMessage, unwrapOrbisMessage } from "@/lib/orbis";
 import {
   BEAT_SECONDS,
   type Campaign,
+  CHANNEL_AUDIO_PROMPT,
   type ChannelState,
+  HOST_SILENT_DIRECTION,
   LEASE_RENEW_MS,
 } from "@/lib/station-types";
 
@@ -19,6 +21,10 @@ export type DirectorApi = {
   log: string[];
   error: string;
 };
+
+/** Every scene prompt keeps the host silent (see HOST_SILENT_DIRECTION). */
+const silent = (prompt: string) =>
+  prompt.includes("lips gently closed") ? prompt : `${prompt.replace(/\s+$/, "")} ${HOST_SILENT_DIRECTION}`;
 
 const sleep = (ms: number, signal: { cancelled: boolean }) =>
   new Promise<void>((resolve) => {
@@ -179,9 +185,10 @@ export function useDirector({
       const imageReady = waitFor((m) => m.type === "state" && m.has_image === true, "image", 20_000);
       await send("set_image", { image: uploaded });
       await imageReady;
-      if (campaign.audio_prompt) await send("set_audio_prompt", { prompt: campaign.audio_prompt });
+      // Instrumental only: the host's voice is TTS layered on top, never Orbis audio.
+      await send("set_audio_prompt", { prompt: CHANNEL_AUDIO_PROMPT });
       const conditionsReady = waitFor((m) => m.type === "conditions_ready", "conditions", 20_000);
-      await send("set_prompt", { prompt: campaign.beats[0] ?? `${campaign.product_name} on a studio counter` });
+      await send("set_prompt", { prompt: silent(campaign.beats[0] ?? `${campaign.product_name} on a studio counter`) });
       await conditionsReady.catch(() => null);
       const started = waitFor((m) => m.type === "generation_started", "generation start", 30_000);
       await send("start");
@@ -227,7 +234,7 @@ export function useDirector({
               beat = (beat + 1) % campaign.beats.length;
               prompt = campaign.beats[beat];
             }
-            await send("set_prompt", { prompt });
+            await send("set_prompt", { prompt: silent(prompt) });
             lastPrompt = Date.now();
             await directorCall(clientId, "beat", { beatIndex: beat, prompt });
           }

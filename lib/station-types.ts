@@ -87,5 +87,15 @@ export const HOST_LOOK =
   "the smiling host in his fifties with swept-back dark hair, a teal suit, white shirt and gold tie";
 /** Storage key (bucket product-images) of the host portrait composited into every start frame. */
 export const HOST_IMAGE_KEY = "demo/host.png";
+/**
+ * The host never speaks in the picture: Orbis generates sound from what it sees, so a talking
+ * face produced garbled mouth noise. He performs like a silent-film showman, and the TTS voice
+ * plays over the top as his thoughts.
+ */
+export const HOST_SILENT_DIRECTION =
+  "The host keeps his lips gently closed in a warm closed-mouth smile the whole time, performing silently with big expressive gestures like a silent-film showman.";
+/** Orbis audio for every segment: instrumental music only, so nothing competes with the host voice. */
+export const CHANNEL_AUDIO_PROMPT =
+  "Soft upbeat instrumental retro lounge music with warm electric piano, light brushed drums and a gentle bass line, steady tempo, low volume.";
 /** Longest host script the campaigns.host_script column accepts. */
 export const HOST_SCRIPT_MAX_CHARS = 1200;
