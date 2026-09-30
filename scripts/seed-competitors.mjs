@@ -36,7 +36,7 @@ const campaigns = [
     budget: 1500,
     ...(() => {
       const p = img("cloudstep-packshot");
-      const s = img("cloudstep-host");
+      const s = img("cloudstep-pedestal");
       return { image_url: p.url, image_key: p.key, staged_image_url: s.url, staged_image_key: s.key };
     })(),
   },
@@ -65,7 +65,7 @@ const campaigns = [
     budget: 800,
     ...(() => {
       const p = img("glow-packshot");
-      const s = img("glow-host");
+      const s = img("glow-pedestal");
       return { image_url: p.url, image_key: p.key, staged_image_url: s.url, staged_image_key: s.key };
     })(),
   },
