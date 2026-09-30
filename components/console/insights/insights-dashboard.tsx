@@ -116,7 +116,7 @@ export function InsightsDashboard() {
 
       <p className="fineprint">
         All figures are mocked for the demo and regenerate deterministically per campaign. Spend is the winning bid
-        (credits per minute) multiplied by airtime; ROAS treats 1 credit as $1.
+        (credits per minute) multiplied by airtime; ROAS treats 1 credit as $8.
       </p>
     </main>
   );

@@ -9,10 +9,13 @@
  * - unique viewers = viewer-seconds on the timeline / average watch time
  * - funnel: impressions >= viewers >= engaged >= product-card clicks >= add-to-cart >= purchases
  * - revenue = sum of every purchase (qty x unit price); AOV = revenue / purchases
- * - spend = bid (credits/min) x airtime minutes; ROAS = revenue / spend (1 credit = $1)
+ * - spend = bid (credits/min) x airtime minutes x CREDIT_USD; ROAS = revenue / spend
  */
 
 import { SEGMENT_SECONDS } from "@/lib/station-types";
+
+/** Demo credit value in dollars; bids on the live board are credits per minute. */
+export const CREDIT_USD = 8;
 
 export type InsightsCampaignId = "diet-coke" | "cloudstep-runner" | "glow-ramen";
 
@@ -222,8 +225,8 @@ const SPECS: Record<InsightsCampaignId, CampaignSpec> = {
       product: "Diet Coke 12-pack",
       category: "Beverages",
       unitPrice: 8.99,
-      compareAtPrice: 10.49,
-      bidPerMin: 200,
+      compareAtPrice: 10.99,
+      bidPerMin: 25,
       segments: 6,
       airingStart: "7:30:00 PM",
       accent: "#ff3d3d",
@@ -288,7 +291,7 @@ const SPECS: Record<InsightsCampaignId, CampaignSpec> = {
       category: "Footwear",
       unitPrice: 129,
       compareAtPrice: 159,
-      bidPerMin: 260,
+      bidPerMin: 22,
       segments: 4,
       airingStart: "6:15:00 PM",
       accent: "#3fd6ff",
@@ -350,7 +353,7 @@ const SPECS: Record<InsightsCampaignId, CampaignSpec> = {
       category: "Grocery",
       unitPrice: 14.5,
       compareAtPrice: null,
-      bidPerMin: 85,
+      bidPerMin: 18,
       segments: 3,
       airingStart: "5:20:00 PM",
       accent: "#ffd23f",
@@ -545,7 +548,8 @@ export function getCampaignInsights(id: InsightsCampaignId): CampaignInsights {
 
   const airtimeMinutes = airtimeSeconds / 60;
   const spendCredits = campaign.bidPerMin * airtimeMinutes;
-  const roas = spendCredits > 0 ? revenue / spendCredits : 0;
+  const spendUsd = spendCredits * CREDIT_USD;
+  const roas = spendUsd > 0 ? revenue / spendUsd : 0;
   const revenuePerMinute = revenue / airtimeMinutes;
 
   /* ----- audience ----- */
@@ -739,14 +743,14 @@ export function getCampaignInsights(id: InsightsCampaignId): CampaignInsights {
       key: "roas",
       label: "ROAS",
       value: `${roas.toFixed(2)}x`,
-      hint: "revenue ÷ spend (1 credit = $1)",
+      hint: `revenue ÷ spend (1 credit = $${CREDIT_USD})`,
       deltaPct: d.roas ?? null,
     },
     {
       key: "spend",
       label: "Spend",
-      value: `${fmtInt(spendCredits)} cr`,
-      hint: `${campaign.bidPerMin} cr/min × ${fmtMinutes(airtimeMinutes)} airtime`,
+      value: fmtMoney(spendUsd),
+      hint: `${campaign.bidPerMin} cr/min × ${fmtMinutes(airtimeMinutes)} × $${CREDIT_USD}/cr`,
       deltaPct: d.spend ?? null,
     },
     {
