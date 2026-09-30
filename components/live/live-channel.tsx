@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { BroadcastOverlay } from "@/components/live/broadcast-overlay";
 import { ChatPanel } from "@/components/live/chat-panel";
+import type { HostApi } from "@/components/live/host-strip";
 import { QueueRail } from "@/components/live/queue-rail";
 import { StationPlayer } from "@/components/live/station-player";
 import { TopBar } from "@/components/top-bar";
@@ -13,7 +14,9 @@ import { useStation } from "@/hooks/use-station";
 export function LiveChannel() {
   const station = useStation({ countViewers: true });
   const [director, setDirector] = useState<DirectorApi | null>(null);
-  // The director tab re-stages the shared video for each fresh host answer.
+  const [host, setHost] = useState<HostApi | null>(null);
+  // Each fresh host answer: the director tab re-stages the shared Orbis picture, while every
+  // tuned tab interrupts its current beat line and plays the cached TTS answer.
   const cued = useRef<number | null>(null);
   useEffect(() => {
     const latest = [...station.chat].reverse().find((m) => m.kind === "host");
@@ -24,10 +27,12 @@ export function LiveChannel() {
     }
     if (latest.id <= cued.current) return;
     cued.current = latest.id;
-    if (director && latest.visual_prompt && Date.now() - Date.parse(latest.created_at) < 20_000) {
+    const fresh = Date.now() - Date.parse(latest.created_at) < 20_000;
+    if (director && latest.visual_prompt && fresh) {
       director.cue(latest.visual_prompt);
     }
-  }, [director, station.chat]);
+    if (host && fresh) host.say(latest.body);
+  }, [director, host, station.chat]);
 
   const lastHost = [...station.chat].reverse().find((m) => m.kind === "host" && m.fact_label);
   const highlight =
@@ -38,7 +43,7 @@ export function LiveChannel() {
       <TopBar live={station.channel?.status === "live"} />
       <div className="live-grid">
         <div className="live-main">
-          <StationPlayer channel={station.channel} onDirector={setDirector}>
+          <StationPlayer channel={station.channel} airing={station.airing} onDirector={setDirector} onHost={setHost}>
             <BroadcastOverlay channel={station.channel} airing={station.airing} highlightFact={highlight} />
           </StationPlayer>
           <QueueRail airing={station.airing} queue={station.queue} />
@@ -46,11 +51,19 @@ export function LiveChannel() {
             <details className="card control-room">
               <summary>Control room (this tab is directing the broadcast)</summary>
               {director.error && <p className="chat-error">{director.error}</p>}
+              {host?.error && <p className="chat-error">{host.error}</p>}
               <ol>
                 {director.log.map((line, index) => (
                   <li key={index}>{line}</li>
                 ))}
               </ol>
+              {host && host.log.length > 0 && (
+                <ol>
+                  {host.log.map((line, index) => (
+                    <li key={index}>{line}</li>
+                  ))}
+                </ol>
+              )}
             </details>
           )}
           {station.error && <p className="chat-error">{station.error}</p>}

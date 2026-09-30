@@ -388,12 +388,11 @@ a {
 
 .player-controls {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 6;
+  top: 9%;
+  right: 2.5%;
+  z-index: 7;
   display: flex;
   gap: 6px;
-  margin-top: 30px;
 }
 
 .chip {
@@ -619,6 +618,125 @@ a {
 
 .bumper-sub {
   color: var(--muted);
+}
+
+/* Max Marquee: compact voice strip above the lower third. Orbis renders him in the main picture. */
+.host-strip {
+  position: absolute;
+  bottom: 24%;
+  left: 2.5%;
+  z-index: 6;
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.65em;
+  width: min(36%, 30em);
+  min-height: 3.8em;
+  padding: 0.55em 0.75em;
+  border-left: 0.32em solid var(--gold);
+  border-radius: 7px;
+  background: linear-gradient(100deg, rgba(8, 11, 31, 0.96), rgba(8, 11, 31, 0.84));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  font-size: clamp(0.6rem, 0.9vw, 0.82rem);
+  pointer-events: none;
+}
+
+.host-strip-identity {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35em;
+  min-width: max-content;
+  font-family: var(--display);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.host-strip-identity strong {
+  color: var(--ink);
+  font-size: 1.2em;
+}
+
+.host-strip-identity span {
+  color: var(--gold);
+  font-size: 0.72em;
+  font-weight: 800;
+}
+
+.voice-bars {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15em;
+  width: 1.15em;
+  height: 1.3em;
+}
+
+.voice-bars i {
+  width: 0.23em;
+  height: 0.35em;
+  border-radius: 1px;
+  background: var(--gold);
+  opacity: 0.4;
+}
+
+.host-strip.speaking .voice-bars i {
+  opacity: 1;
+  animation: voice-bar 700ms ease-in-out infinite;
+}
+
+.host-strip.speaking .voice-bars i:nth-child(2) {
+  animation-delay: 150ms;
+}
+
+.host-strip.speaking .voice-bars i:nth-child(3) {
+  animation-delay: 300ms;
+}
+
+@keyframes voice-bar {
+  0%,
+  100% {
+    height: 0.35em;
+  }
+  50% {
+    height: 1.3em;
+  }
+}
+
+.host-caption {
+  display: -webkit-box;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  color: #d9dcf2;
+  line-height: 1.35;
+}
+
+.cap-said {
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.cap-ahead {
+  color: #d9dcf2;
+}
+
+.cap-status {
+  color: var(--muted);
+  font-style: italic;
+}
+
+@media (max-width: 720px) {
+  .host-strip {
+    width: 46%;
+    bottom: 30%;
+    grid-template-columns: auto auto;
+  }
+
+  .host-caption {
+    grid-column: 1 / -1;
+  }
 }
 
 /* rail */

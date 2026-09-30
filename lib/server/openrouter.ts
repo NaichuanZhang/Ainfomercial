@@ -36,7 +36,14 @@ async function post(body: Record<string, unknown>, timeoutMs: number) {
 export async function chatJson<T>(
   model: string,
   messages: ChatMessage[],
-  options: { schema?: Record<string, unknown>; maxTokens?: number; timeoutMs?: number; temperature?: number } = {},
+  options: {
+    schema?: Record<string, unknown>;
+    maxTokens?: number;
+    timeoutMs?: number;
+    temperature?: number;
+    /** OpenRouter `reasoning.effort`; reasoning models otherwise spend the whole token budget thinking. */
+    reasoningEffort?: string;
+  } = {},
 ): Promise<T> {
   const result = await post(
     {
@@ -44,6 +51,7 @@ export async function chatJson<T>(
       messages,
       max_completion_tokens: options.maxTokens ?? 1200,
       temperature: options.temperature ?? 0.7,
+      ...(options.reasoningEffort ? { reasoning: { effort: options.reasoningEffort } } : {}),
       response_format: options.schema
         ? { type: "json_schema", json_schema: { name: "result", strict: true, schema: options.schema } }
         : { type: "json_object" },
