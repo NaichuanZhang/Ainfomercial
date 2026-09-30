@@ -221,13 +221,13 @@ export function HostStrip({
 
   const caption = captionWindow(line.text, line.progress);
   return (
-    <aside className={`host-strip${line.speaking ? " speaking" : ""}`} aria-label="AI host voice">
+    <aside className={`host-strip${line.speaking ? " speaking" : ""}`} aria-label="The host's thoughts, out loud">
       <div className="host-strip-identity">
         <strong>{HOST_NAME}</strong>
         <span aria-hidden>·</span>
-        <span>AI host</span>
+        <span>thinking out loud 💭</span>
       </div>
-      <span className="voice-bars" aria-label={line.speaking ? "Speaking" : "Standing by"}>
+      <span className="voice-bars" aria-label={line.speaking ? "Thinking out loud" : "Quiet"}>
         <i />
         <i />
         <i />
@@ -239,7 +239,7 @@ export function HostStrip({
             <span className="cap-ahead">{caption.ahead}</span>
           </>
         ) : (
-          <span className="cap-status">{active ? "Standing by for the next beat" : "Tune in to hear Max"}</span>
+          <span className="cap-status">{active ? "…" : "Tune in to hear what Max is thinking"}</span>
         )}
       </p>
     </aside>
