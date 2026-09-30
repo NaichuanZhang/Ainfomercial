@@ -1,0 +1,23 @@
+.env.local
+.next/
+node_modules/
+npm-debug.log*
+*.tsbuildinfo
+.reactor-dev-sessions.json
+.reactor-dev-sessions.json.*.tmp
+
+# InsForge & AI agent skills
+.insforge
+.agent
+.agents
+.augment
+.claude
+.cline
+.github/copilot*
+.kilocode
+.qoder
+.qwen
+.roo
+.trae
+.windsurf
+.vercel/
