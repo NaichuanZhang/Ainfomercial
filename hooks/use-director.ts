@@ -94,6 +94,12 @@ export function useDirector({
   const [error, setError] = useState("");
   const waiters = useRef(new Set<Waiter>());
   const runStarted = useRef(false);
+  // Loop state lives in refs: an SDK reconnect re-runs the loop effect, and losing this state used
+  // to make the next product look like a fresh run (reset + new start frame) instead of one take.
+  const airingRef = useRef<string | null>(null);
+  const runStartedAtRef = useRef(0);
+  const putDownRef = useRef<string | null>(null);
+  const segmentRef = useRef<{ campaign: Campaign; channel: ChannelState } | null>(null);
   const cueQueue = useRef<string[]>([]);
   const onLostLeaseRef = useRef(onLostLease);
   onLostLeaseRef.current = onLostLease;
@@ -175,9 +181,6 @@ export function useDirector({
   useEffect(() => {
     if (!enabled || status !== "ready") return;
     const signal = { cancelled: false };
-    let airingId: string | null = null;
-    // When the current Orbis run started; product changes inside a young run are continuous.
-    let runStartedAt = 0;
 
     const stage = async (campaign: Campaign) => {
       if (runStarted.current) {
@@ -223,41 +226,58 @@ export function useDirector({
 
     const loop = async () => {
       // Product the host set down at the end of the previous segment, if any.
-      let putDownId: string | null = null;
+      // Restarted mid-segment (SDK reconnect) with the run still going: finish that segment.
+      const pending = segmentRef.current;
+      let resume =
+        !!pending &&
+        runStarted.current &&
+        airingRef.current === pending.campaign.id &&
+        Date.parse(pending.channel.segment_ends_at ?? "") > Date.now() + 2_000;
       while (!signal.cancelled) {
         try {
-          // One continuous take while the run is young: the next product is brought in by a prompt.
-          // An old (or missing) run is refreshed with a reset behind the viewers' seam cover.
+          let campaign: Campaign;
+          let channel: ChannelState;
+          // One continuous take: the next product is steered in by a prompt. Only a missing run,
+          // or one near Orbis's run limit, is restarted from a start frame (behind the seam cover).
           const continuous =
-            runStarted.current && airingId !== null && Date.now() - runStartedAt < RUN_REFRESH_MS;
-          const { campaign, channel } = await directorCall(clientId, "next_segment", { continuous });
-          if (!campaign || !channel?.segment_ends_at) {
+            runStarted.current && airingRef.current !== null && Date.now() - runStartedAtRef.current < RUN_REFRESH_MS;
+          if (resume && pending) {
+            resume = false;
+            ({ campaign, channel } = pending);
+            note(`resuming ${campaign.product_name}`);
+          } else {
+          const next = await directorCall(clientId, "next_segment", { continuous });
+          if (!next.campaign || !next.channel?.segment_ends_at) {
             note("queue empty, waiting");
             await sleep(10_000, signal);
             continue;
           }
-          if (continuous && runStarted.current && campaign.id !== airingId) {
+          campaign = next.campaign;
+          channel = next.channel;
+          segmentRef.current = { campaign, channel };
+          if (continuous && runStarted.current && campaign.id !== airingRef.current) {
             await send("set_prompt", { prompt: bringUpPrompt(campaign.product_name, campaign.look) });
             note(`handoff: bring up ${campaign.product_name} (same take)`);
-            airingId = campaign.id;
-          } else if (campaign.id !== airingId || !runStarted.current) {
+            airingRef.current = campaign.id;
+          } else if (campaign.id !== airingRef.current || !runStarted.current) {
             await stage(campaign);
             if (signal.cancelled) return;
-            airingId = campaign.id;
-            runStartedAt = Date.now();
+            airingRef.current = campaign.id;
+            runStartedAtRef.current = Date.now();
           } else {
             note(`${campaign.product_name} stays on air`);
-            if (putDownId === campaign.id) {
+            if (putDownRef.current === campaign.id) {
               // The queue changed after the put-down: have the host pick the same product back up.
               await send("set_prompt", { prompt: pickUpPrompt(campaign.product_name) });
               note(`handoff: pick up ${campaign.product_name}`);
             }
           }
-          putDownId = null;
+          putDownRef.current = null;
+          }
           await directorCall(clientId, "live");
           note(`on air: ${campaign.product_name}`);
 
-          const endsAt = Date.parse(channel.segment_ends_at);
+          const endsAt = Date.parse(channel.segment_ends_at ?? "");
           const handoffAt = endsAt - HANDOFF_LEAD_MS;
           // The pick-up shot is on screen, so the first scripted beat is beats[0].
           let beat = -1;
@@ -285,14 +305,14 @@ export function useDirector({
               // The put-down wins: a late Q&A shot would fight the morph, so it is dropped (the
               // spoken answer still plays on every tab).
               cueQueue.current = [];
-              if (putDownId === campaign.id && !emptyHandsSent && now >= handoffAt + EMPTY_HANDS_AFTER_MS) {
+              if (putDownRef.current === campaign.id && !emptyHandsSent && now >= handoffAt + EMPTY_HANDS_AFTER_MS) {
                 await send("set_prompt", { prompt: EMPTY_HANDS_PROMPT });
                 emptyHandsSent = true;
                 note("handoff: empty hands");
               }
-              if (now >= handoffAt && putDownId !== campaign.id) {
+              if (now >= handoffAt && putDownRef.current !== campaign.id) {
                 await send("set_prompt", { prompt: putDownPrompt(campaign.product_name) });
-                putDownId = campaign.id;
+                putDownRef.current = campaign.id;
                 note(`handoff: put down ${campaign.product_name}`);
                 // Marks the handoff in channel_state: every tab's host strip speaks the handoff line.
                 await directorCall(clientId, "beat", {

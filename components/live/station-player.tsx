@@ -74,6 +74,20 @@ export function StationPlayer({
   useEffect(() => musicRef.current?.setMuted(muted), [muted]);
   useEffect(() => () => musicRef.current?.stop(), []);
   const [seam, setSeam] = useState<SeamState>(SEAM_IDLE);
+  // A tab left open across a deploy keeps running the old airing logic; say so.
+  const [stale, setStale] = useState(false);
+  useEffect(() => {
+    const mine = process.env.NEXT_PUBLIC_BUILD_ID;
+    if (!mine) return;
+    const check = () =>
+      fetch("/api/version", { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((v: { build?: string | null } | null) => setStale(!!v?.build && v.build !== mine))
+        .catch(() => undefined);
+    void check();
+    const timer = setInterval(check, 30_000);
+    return () => clearInterval(timer);
+  }, []);
   const frameRef = useRef<HTMLDivElement>(null);
   // The <video> is rendered by the Reactor SDK inside the frame; the seam cover looks it up live.
   const getVideo = useCallback(() => frameRef.current?.querySelector("video") ?? null, []);
@@ -220,6 +234,14 @@ export function StationPlayer({
             </button>
             <p>Live AI-generated video with sound. Nothing is pre-recorded.</p>
           </div>
+        </div>
+      )}
+      {stale && (
+        <div className="player-note">
+          A new version of the channel is live.{" "}
+          <button type="button" className="btn primary" onClick={() => window.location.reload()}>
+            Reload
+          </button>
         </div>
       )}
       {tuned && waiting && <div className="player-note">Warming up the studio…</div>}

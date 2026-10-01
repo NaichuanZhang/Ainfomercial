@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { useSeam } from "@/components/live/seam-cover";
+import { BRING_UP_LAND_MS, isHandoffBeat } from "@/lib/handoff";
 import type { Campaign, ChannelState } from "@/lib/station-types";
 
 function useNow(intervalMs = 1_000) {
@@ -30,17 +31,41 @@ export function BroadcastOverlay({
   channel,
   airing,
   highlightFact,
+  upNext,
 }: {
   channel: ChannelState | null;
   airing: Campaign | null;
   highlightFact?: string | null;
+  /** The highest bid waiting (same order the server picks from), shown while the host hands off. */
+  upNext?: Campaign | null;
 }) {
-  const now = useNow();
+  const now = useNow(250);
   const seam = useSeam();
+  const live = channel?.status === "live";
+
+  // Graphics follow the product in the picture, not the database row. A continuous handoff is
+  // one take: the product leaves (handoff beat), then the next one is lifted into frame, which
+  // lands a few seconds after the segment starts. Until then the lower third stays down and a
+  // slim "Up next" bar names what is coming.
+  const previousAiring = useRef<string | null>(null);
+  const [enteringUntil, setEnteringUntil] = useState(0);
+  useEffect(() => {
+    const id = airing?.id ?? null;
+    const before = previousAiring.current;
+    previousAiring.current = id;
+    if (id && before && before !== id && live && !seam.covering) {
+      const started = Date.parse(channel?.segment_started_at ?? "") || Date.now();
+      setEnteringUntil(started + BRING_UP_LAND_MS);
+    }
+  }, [airing?.id, channel?.segment_started_at, live, seam.covering]);
+  const handingOff = live && isHandoffBeat(channel?.beat_index);
+  const entering = live && now < enteringUntil;
+  const comingUp = handingOff ? (upNext ?? null) : entering ? airing : null;
+
   // While the player holds the last frame of a product change, the regular graphics wait for the
   // crossfade to finish; a same-product re-air keeps them up (the picture never stops).
-  const live = channel?.status === "live";
-  const onAir = !!airing && ((live && !seam.covering) || (seam.covering && !seam.upNext));
+  const onAir =
+    !!airing && !handingOff && !entering && ((live && !seam.covering) || (seam.covering && !seam.upNext));
   const remaining = channel?.segment_ends_at
     ? Math.max(0, Math.round((Date.parse(channel.segment_ends_at) - now) / 1000))
     : 0;
@@ -60,7 +85,7 @@ export function BroadcastOverlay({
         A<span>.</span>I
       </div>
       <div className="ai-label">AI-generated video</div>
-      {onAir && <span className="live-pill overlay-live">Live</span>}
+      {(onAir || handingOff || entering) && <span className="live-pill overlay-live">Live</span>}
 
       {onAir && airing && (
         <div className="lower-third">
@@ -86,6 +111,22 @@ export function BroadcastOverlay({
         </div>
       )}
 
+      {comingUp && !seam.covering && (
+        <div className="up-next" key={`handoff-${comingUp.id}`}>
+          {comingUp.image_url && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img className="up-next-img" src={comingUp.image_url} alt="" />
+          )}
+          <div className="up-next-text">
+            <div className="up-next-kicker">Up next</div>
+            <div className="up-next-name">{comingUp.product_name}</div>
+            <div className="up-next-sub">
+              {comingUp.brand} · Item {itemNumber(comingUp)}
+            </div>
+          </div>
+        </div>
+      )}
+
       {!onAir && seam.upNext && airing && (
         <div className="up-next" key={airing.id}>
           {airing.image_url && (
@@ -102,7 +143,7 @@ export function BroadcastOverlay({
         </div>
       )}
 
-      {!onAir && !seam.covering && (
+      {!onAir && !seam.covering && !comingUp && !(live && (handingOff || entering)) && (
         <div className="bumper">
           <p className="bumper-kicker">{channel?.status === "offline" || !channel ? "Off air" : "Coming up next"}</p>
           {airing ? (

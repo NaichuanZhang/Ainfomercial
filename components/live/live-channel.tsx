@@ -45,7 +45,12 @@ export function LiveChannel() {
       <div className="channel-page">
         <div className="channel-main">
           <StationPlayer channel={station.channel} airing={station.airing} onDirector={setDirector} onHost={setHost}>
-            <BroadcastOverlay channel={station.channel} airing={station.airing} highlightFact={highlight} />
+            <BroadcastOverlay
+              channel={station.channel}
+              airing={station.airing}
+              highlightFact={highlight}
+              upNext={station.queue[0] ?? null}
+            />
           </StationPlayer>
           <StreamInfo channel={station.channel} airing={station.airing} viewers={station.viewers} />
           <div className="channel-content">

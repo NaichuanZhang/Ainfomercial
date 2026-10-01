@@ -56,6 +56,9 @@ export const EMPTY_HANDS_PROMPT = "The host rests both empty hands on the counte
 /** How long after the put-down the empty-hands step is sent (one morph lands in 2-4 s). */
 export const EMPTY_HANDS_AFTER_MS = 3_500;
 
+/** How long after a continuous product change the lift-in has landed, so the graphics switch with it. */
+export const BRING_UP_LAND_MS = 3_500;
+
 /**
  * Step 3, the next segment's first prompt: the next product enters the same continuous take
  * through an action, named by what the camera sees (the model renders nouns, not brands).
@@ -89,9 +92,9 @@ export const followingPrompt = (prompt: string) =>
   prompt.replace(/^The smiling host in the teal suit and gold tie\b/i, "The host").replace(/\s+/g, " ").trim();
 
 /**
- * A run is refreshed (reset + new start frame, behind the seam cover) once it is this old, because
- * Orbis holds a scene best over its first few minutes. Product changes inside a run are continuous.
+ * Every product change is steered inside the running take. A run is only restarted from a start
+ * frame (behind the seam cover) shortly before Orbis's own ~61 min run limit.
  */
-export const RUN_REFRESH_MS = 5 * 60_000;
+export const RUN_REFRESH_MS = 50 * 60_000;
 
 export const isHandoffBeat = (beatIndex: number | null | undefined) => beatIndex === HANDOFF_BEAT_INDEX;
