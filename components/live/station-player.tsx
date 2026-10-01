@@ -1,6 +1,7 @@
 "use client";
 
 import { ReactorProvider, ReactorView, useReactor } from "@reactor-team/js-sdk";
+import { createLoungeMusic, type LoungeMusic } from "@/lib/client/lounge-music";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { type HostApi, HostStrip } from "@/components/live/host-strip";
@@ -68,6 +69,10 @@ export function StationPlayer({
   const [error, setError] = useState("");
   const [muted, setMuted] = useState(false);
   const [voiceMuted, setVoiceMuted] = useState(false);
+  // Orbis audio is off (it turned the silent host into garbled speech); every tab plays its own lounge loop.
+  const musicRef = useRef<LoungeMusic | null>(null);
+  useEffect(() => musicRef.current?.setMuted(muted), [muted]);
+  useEffect(() => () => musicRef.current?.stop(), []);
   const [seam, setSeam] = useState<SeamState>(SEAM_IDLE);
   const frameRef = useRef<HTMLDivElement>(null);
   // The <video> is rendered by the Reactor SDK inside the frame; the seam cover looks it up live.
@@ -185,6 +190,7 @@ export function StationPlayer({
         channel={channel}
         airing={airing ?? null}
         onHost={receiveHost}
+        onSpeakingChange={(speaking) => musicRef.current?.setDucked(speaking)}
       />
 
       {!tuned && (
@@ -199,6 +205,11 @@ export function StationPlayer({
               className="btn primary big tune-in-btn"
               onClick={() => {
                 hostRef.current?.unlock();
+                if (!musicRef.current) {
+                  musicRef.current = createLoungeMusic();
+                  musicRef.current?.setMuted(muted);
+                }
+                musicRef.current?.start();
                 setTuned(true);
                 void tune();
               }}
@@ -218,7 +229,7 @@ export function StationPlayer({
         <div className="player-controls">
           <button type="button" className="player-btn" onClick={() => setMuted((m) => !m)}>
             <Icon.Speaker muted={muted} />
-            <span>{muted ? "Unmute picture" : "Mute picture"}</span>
+            <span>{muted ? "Unmute music" : "Mute music"}</span>
           </button>
           <button type="button" className="player-btn" onClick={() => setVoiceMuted((m) => !m)}>
             <Icon.Mic muted={voiceMuted} />

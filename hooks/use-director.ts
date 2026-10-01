@@ -15,7 +15,6 @@ import {
 import {
   BEAT_SECONDS,
   type Campaign,
-  CHANNEL_AUDIO_PROMPT,
   type ChannelState,
   HOST_SILENT_DIRECTION,
   LEASE_RENEW_MS,
@@ -200,8 +199,9 @@ export function useDirector({
       const imageReady = waitFor((m) => m.type === "state" && m.has_image === true, "image", 20_000);
       await send("set_image", { image: uploaded });
       await imageReady;
-      // Instrumental only: the host's voice is TTS layered on top, never Orbis audio.
-      await send("set_audio_prompt", { prompt: CHANNEL_AUDIO_PROMPT });
+      // No Orbis audio at all: with a host in frame it generated garbled speech over the TTS voice.
+      // Viewers' tabs play their own background music (lib/client/lounge-music.ts) instead.
+      await send("set_audio_enabled", { audio_enabled: false }).catch(() => null);
       const conditionsReady = waitFor((m) => m.type === "conditions_ready", "conditions", 20_000);
       // The start frame has the product resting on the pedestal: the run opens with the host
       // picking it up, and the scripted beats follow from beats[0].

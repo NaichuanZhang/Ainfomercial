@@ -70,9 +70,12 @@ export function HostStrip({
   channel,
   airing,
   onHost,
+  onSpeakingChange,
 }: {
   active: boolean;
   muted: boolean;
+  /** Fires when the host voice starts or stops, so the background music can duck under it. */
+  onSpeakingChange?: (speaking: boolean) => void;
   channel: ChannelState | null;
   airing: Campaign | null;
   onHost?: (api: HostApi | null) => void;
@@ -126,6 +129,12 @@ export function HostStrip({
   useEffect(() => {
     if (audio.current) audio.current.muted = muted;
   }, [muted]);
+
+  const onSpeakingRef = useRef(onSpeakingChange);
+  onSpeakingRef.current = onSpeakingChange;
+  useEffect(() => {
+    onSpeakingRef.current?.(line.speaking);
+  }, [line.speaking]);
 
   const unlock = useCallback(() => {
     const element = audio.current;
