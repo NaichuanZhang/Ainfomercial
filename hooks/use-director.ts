@@ -11,6 +11,8 @@ import {
   pickUpPrompt,
   putDownPrompt,
   RESET_SETTLE_MS,
+  RUN_REFRESH_MS,
+  bringUpPrompt,
 } from "@/lib/handoff";
 import {
   BEAT_SECONDS,
@@ -174,6 +176,8 @@ export function useDirector({
     if (!enabled || status !== "ready") return;
     const signal = { cancelled: false };
     let airingId: string | null = null;
+    // When the current Orbis run started; product changes inside a young run are continuous.
+    let runStartedAt = 0;
 
     const stage = async (campaign: Campaign) => {
       if (runStarted.current) {
@@ -222,16 +226,25 @@ export function useDirector({
       let putDownId: string | null = null;
       while (!signal.cancelled) {
         try {
-          const { campaign, channel } = await directorCall(clientId, "next_segment");
+          // One continuous take while the run is young: the next product is brought in by a prompt.
+          // An old (or missing) run is refreshed with a reset behind the viewers' seam cover.
+          const continuous =
+            runStarted.current && airingId !== null && Date.now() - runStartedAt < RUN_REFRESH_MS;
+          const { campaign, channel } = await directorCall(clientId, "next_segment", { continuous });
           if (!campaign || !channel?.segment_ends_at) {
             note("queue empty, waiting");
             await sleep(10_000, signal);
             continue;
           }
-          if (campaign.id !== airingId || !runStarted.current) {
+          if (continuous && runStarted.current && campaign.id !== airingId) {
+            await send("set_prompt", { prompt: silent(bringUpPrompt(campaign.product_name, campaign.look)) });
+            note(`handoff: bring up ${campaign.product_name} (same take)`);
+            airingId = campaign.id;
+          } else if (campaign.id !== airingId || !runStarted.current) {
             await stage(campaign);
             if (signal.cancelled) return;
             airingId = campaign.id;
+            runStartedAt = Date.now();
           } else {
             note(`${campaign.product_name} stays on air`);
             if (putDownId === campaign.id) {

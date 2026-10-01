@@ -18,6 +18,7 @@ type DirectorRequest = {
   action?: unknown;
   beatIndex?: unknown;
   prompt?: unknown;
+  continuous?: unknown;
 };
 
 const json = (body: unknown, status = 200) =>
@@ -46,7 +47,7 @@ export async function POST(request: Request) {
           const next = await updateChannel({ status: "bumper", airing_campaign_id: null });
           return json({ campaign: null, channel: publicChannel(next) });
         }
-        const next = await startSegment(campaign);
+        const next = await startSegment(campaign, body.continuous === true);
         return json({ campaign, channel: publicChannel(next) });
       }
       case "peek_next": {

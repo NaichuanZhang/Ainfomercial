@@ -133,11 +133,12 @@ export async function finishSegment(channel: ChannelRow) {
     .eq("id", "main");
 }
 
-export async function startSegment(campaign: Campaign) {
+/** `continuous`: the Orbis run carries straight on into this product, so the channel stays live. */
+export async function startSegment(campaign: Campaign, continuous = false) {
   const now = Date.now();
   await db().from("campaigns").update({ status: "airing" }).eq("id", campaign.id);
   return updateChannel({
-    status: "bumper",
+    status: continuous ? "live" : "bumper",
     airing_campaign_id: campaign.id,
     segment_started_at: new Date(now).toISOString(),
     segment_ends_at: new Date(now + SEGMENT_SECONDS * 1000).toISOString(),

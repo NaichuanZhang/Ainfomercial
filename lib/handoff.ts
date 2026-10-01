@@ -35,7 +35,24 @@ export const SEAM_SETTLE_MS = 500;
 export const SEAM_MAX_MS = 20_000;
 
 export const putDownPrompt = (product: string) =>
-  `The host places the ${product} down behind the counter, out of view, leaving the black display pedestal on the right empty, then rests both empty hands on the counter and smiles at the camera.`;
+  `The host places the ${product} down behind the counter, out of view, then rests both empty hands on the counter and smiles at the camera.`;
+
+/**
+ * Continuous handoff: the same Orbis run keeps going and the next product is brought into the
+ * scene by an action (the prompt guide's way to introduce a new subject), so there is no reset,
+ * no stall and no cut. `look` is the campaign's one-line visual description.
+ */
+export const bringUpPrompt = (product: string, look?: string | null) => {
+  const described = (look ?? "").trim().replace(/[.\s]+$/, "");
+  const detail = described ? ` The ${product} is a ${described.charAt(0).toLowerCase()}${described.slice(1)}.` : "";
+  return `The host lifts the ${product} up from behind the counter and holds it toward the camera with a big closed-mouth grin.${detail}`;
+};
+
+/**
+ * A run is refreshed (reset + new start frame, behind the seam cover) once it is this old, because
+ * Orbis holds a scene best over its first few minutes. Product changes inside a run are continuous.
+ */
+export const RUN_REFRESH_MS = 5 * 60_000;
 
 export const pickUpPrompt = (product: string) =>
   `The host reaches over to the black display pedestal on the right, picks up the ${product} and holds it up toward the camera with a big closed-mouth grin.`;
