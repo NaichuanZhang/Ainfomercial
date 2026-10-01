@@ -2335,3 +2335,23 @@ h4 {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* Demo recorder (only with ?rec=1); hidden while recording. */
+.tab-recorder {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: #1f1f23;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 13px;
+  color: #adadb8;
+}
+.tab-recorder-error {
+  color: #ff8a80;
+}

@@ -8,6 +8,7 @@ import type { HostApi } from "@/components/live/host-strip";
 import { QueueRail } from "@/components/live/queue-rail";
 import { StationPlayer } from "@/components/live/station-player";
 import { StreamInfo } from "@/components/live/stream-info";
+import { TabRecorder } from "@/components/live/tab-recorder";
 import { AppShell } from "@/components/shell/app-shell";
 import type { DirectorApi } from "@/hooks/use-director";
 import { useStation } from "@/hooks/use-station";
@@ -43,6 +44,7 @@ export function LiveChannel() {
   return (
     <AppShell live={live} airing={station.airing} queue={station.queue} className="shell-channel">
       <div className="channel-page">
+        <TabRecorder />
         <div className="channel-main">
           <StationPlayer channel={station.channel} airing={station.airing} onDirector={setDirector} onHost={setHost}>
             <BroadcastOverlay
