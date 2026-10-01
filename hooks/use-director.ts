@@ -5,6 +5,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { type OrbisMessage, unwrapOrbisMessage } from "@/lib/orbis";
 import {
+  HANDOFF_BEAT_INDEX,
+  HANDOFF_LEAD_MS,
+  HANDOFF_QUIET_MS,
+  pickUpPrompt,
+  putDownPrompt,
+  RESET_SETTLE_MS,
+} from "@/lib/handoff";
+import {
   BEAT_SECONDS,
   type Campaign,
   CHANNEL_AUDIO_PROMPT,
@@ -51,6 +59,8 @@ export async function directorCall(
     isDirector?: boolean;
     channel?: ChannelState;
     campaign?: Campaign | null;
+    nextCampaignId?: string | null;
+    nextProductName?: string | null;
   };
   if (!response.ok) {
     const error = new Error(body.error ?? `director ${action} failed (${response.status})`);
@@ -168,6 +178,11 @@ export function useDirector({
 
     const stage = async (campaign: Campaign) => {
       if (runStarted.current) {
+        // Every viewer tab freezes on the frame showing when channel_state flips to `bumper`.
+        // Keep the old run alive until that realtime event has landed, so the held frame is the
+        // empty-handed host and not a stalled stream.
+        await sleep(RESET_SETTLE_MS, signal);
+        if (signal.cancelled) return;
         note("reset for the next product");
         await send("reset").catch(() => null);
         await waitFor(
@@ -188,7 +203,10 @@ export function useDirector({
       // Instrumental only: the host's voice is TTS layered on top, never Orbis audio.
       await send("set_audio_prompt", { prompt: CHANNEL_AUDIO_PROMPT });
       const conditionsReady = waitFor((m) => m.type === "conditions_ready", "conditions", 20_000);
-      await send("set_prompt", { prompt: silent(campaign.beats[0] ?? `${campaign.product_name} on a studio counter`) });
+      // The start frame has the product resting on the pedestal: the run opens with the host
+      // picking it up, and the scripted beats follow from beats[0].
+      await send("set_prompt", { prompt: silent(pickUpPrompt(campaign.product_name)) });
+      note(`handoff: pick up ${campaign.product_name}`);
       await conditionsReady.catch(() => null);
       const started = waitFor((m) => m.type === "generation_started", "generation start", 30_000);
       await send("start");
@@ -200,6 +218,8 @@ export function useDirector({
     };
 
     const loop = async () => {
+      // Product the host set down at the end of the previous segment, if any.
+      let putDownId: string | null = null;
       while (!signal.cancelled) {
         try {
           const { campaign, channel } = await directorCall(clientId, "next_segment");
@@ -210,33 +230,77 @@ export function useDirector({
           }
           if (campaign.id !== airingId || !runStarted.current) {
             await stage(campaign);
+            if (signal.cancelled) return;
             airingId = campaign.id;
           } else {
             note(`${campaign.product_name} stays on air`);
+            if (putDownId === campaign.id) {
+              // The queue changed after the put-down: have the host pick the same product back up.
+              await send("set_prompt", { prompt: silent(pickUpPrompt(campaign.product_name)) });
+              note(`handoff: pick up ${campaign.product_name}`);
+            }
           }
+          putDownId = null;
           await directorCall(clientId, "live");
           note(`on air: ${campaign.product_name}`);
 
           const endsAt = Date.parse(channel.segment_ends_at);
-          let beat = 0;
+          const handoffAt = endsAt - HANDOFF_LEAD_MS;
+          // The pick-up shot is on screen, so the first scripted beat is beats[0].
+          let beat = -1;
           let lastPrompt = Date.now();
+          // Who airs next, looked up once (read-only) shortly before the put-down is due.
+          let upNext: { id: string | null; name: string | null } | null = null;
           while (!signal.cancelled && Date.now() < endsAt - 1_000) {
             await sleep(500, signal);
+            const now = Date.now();
+
+            if (!upNext && now >= handoffAt - HANDOFF_QUIET_MS) {
+              upNext = await directorCall(clientId, "peek_next")
+                .then((peek) => ({ id: peek.nextCampaignId ?? null, name: peek.nextProductName ?? null }))
+                .catch((caught: Error & { lostLease?: boolean }) => {
+                  if (caught.lostLease) throw caught;
+                  // A failed look-ahead only costs the put-down; the segment plays out normally.
+                  note(`peek failed: ${caught.message}`);
+                  return { id: null, name: null };
+                });
+              if (upNext.id && upNext.id !== campaign.id) note(`up next: ${upNext.name ?? upNext.id}`);
+            }
+            const switching = !!upNext?.id && upNext.id !== campaign.id;
+            if (switching) {
+              // The put-down wins: a late Q&A shot would fight the morph, so it is dropped (the
+              // spoken answer still plays on every tab).
+              cueQueue.current = [];
+              if (now >= handoffAt && putDownId !== campaign.id) {
+                await send("set_prompt", { prompt: silent(putDownPrompt(campaign.product_name)) });
+                putDownId = campaign.id;
+                note(`handoff: put down ${campaign.product_name}`);
+                // Marks the handoff in channel_state: every tab's host strip speaks the handoff line.
+                await directorCall(clientId, "beat", {
+                  beatIndex: HANDOFF_BEAT_INDEX,
+                  prompt: putDownPrompt(campaign.product_name),
+                });
+              }
+              // Quiet before the put-down, then hold the empty-handed shot until the segment ends.
+              continue;
+            }
+
             const cue = cueQueue.current.shift();
-            const beatDue = Date.now() - lastPrompt >= BEAT_SECONDS * 1000;
+            const beatDue = now - lastPrompt >= BEAT_SECONDS * 1000;
             if (!cue && !beatDue) continue;
-            if (Date.now() > endsAt - 4_000) break;
+            if (now > endsAt - 4_000) break;
             let prompt: string;
             if (cue) {
               prompt = cue;
             } else {
-              if (campaign.beats.length < 2) continue;
+              // A single scripted beat is sent once; longer scripts cycle.
+              if (!campaign.beats.length || (campaign.beats.length < 2 && beat >= 0)) continue;
               beat = (beat + 1) % campaign.beats.length;
               prompt = campaign.beats[beat];
             }
             await send("set_prompt", { prompt: silent(prompt) });
             lastPrompt = Date.now();
-            await directorCall(clientId, "beat", { beatIndex: beat, prompt });
+            await directorCall(clientId, "beat", { beatIndex: Math.max(beat, 0), prompt });
           }
         } catch (caught) {
           const failure = caught as Error & { lostLease?: boolean };

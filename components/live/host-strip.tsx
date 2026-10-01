@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { HANDOFF_LINE, isHandoffBeat } from "@/lib/handoff";
 import { type Campaign, type ChannelState, HOST_NAME } from "@/lib/station-types";
 
 export type HostApi = {
@@ -191,12 +192,24 @@ export function HostStrip({
     void Promise.allSettled(hostLines.map((text) => speechUrl(text)));
   }, [hostLines]);
 
-  // Every tab follows the shared Orbis beat. A segment key makes beat zero play once per segment.
+  // The handoff line is the same for every product: warm its cached WAV once per tab.
   useEffect(() => {
-    if (!active || channel?.status !== "live" || !channel.segment_started_at || !hostLines.length || !airing) return;
+    if (active) void speechUrl(HANDOFF_LINE).catch(() => undefined);
+  }, [active]);
+
+  // Every tab follows the shared Orbis beat. A segment key makes beat zero play once per segment.
+  // beat_index HANDOFF_BEAT_INDEX means the host is putting the product down: speak the handoff line.
+  useEffect(() => {
+    if (!active || channel?.status !== "live" || !channel.segment_started_at || !airing) return;
     if (airing.id !== channel.airing_campaign_id) return;
     const key = `${airing.id}:${channel.segment_started_at}:${channel.beat_index}`;
     if (lastBeat.current === key) return;
+    if (isHandoffBeat(channel.beat_index)) {
+      lastBeat.current = key;
+      void play(HANDOFF_LINE, "handoff");
+      return;
+    }
+    if (!hostLines.length) return;
     lastBeat.current = key;
     const text = hostLines[channel.beat_index % hostLines.length];
     if (text) void play(text, `beat ${channel.beat_index + 1}`);
