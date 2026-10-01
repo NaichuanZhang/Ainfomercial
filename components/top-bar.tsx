@@ -10,6 +10,7 @@ const LINKS = [
   { href: "/live", label: "Watch live" },
   { href: "/console", label: "Advertiser console", exact: true },
   { href: "/console/insights", label: "Insights" },
+  { href: "/demo", label: "Demo" },
 ];
 
 /** 50 px top navigation: wordmark, primary links, centered search, primary action and icon buttons. */

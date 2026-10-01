@@ -10,7 +10,20 @@ Built for the [Visko Orbis Online Challenge](https://www.visko.ai/challenge/orbi
 (September 2026).
 
 Live: https://5whyuw3k.insforge.site · `/live` (the channel) · `/console` (advertisers) ·
-`/console/insights` (mocked analytics)
+`/console/insights` (mocked analytics) · **[`/demo`](https://5whyuw3k.insforge.site/demo) (2:45 demo video)**
+
+## Screenshots
+
+| | |
+| - | - |
+| ![Diet Coke on air: Max holds the can, lower third with item #, fact card, price box and on-air clock](docs/screenshots/live-on-air.jpg) | ![A viewer asks "Does it taste like regular Coke?" and Max answers on air from the advertiser's facts](docs/screenshots/live-qa.jpg) |
+| **On air.** One continuous Orbis take; every graphic is HTML from the campaign. | **Live Q&A.** The answer is spoken by Max and grounded in the advertiser's facts. |
+| ![Handoff: Max lowers the can behind the counter while an "Up next: Glow Ramen" bar names the next highest bid](docs/screenshots/live-handoff.jpg) | ![Glow Ramen lifted into the same shot after a +5 raise made it the next product](docs/screenshots/live-next-product.jpg) |
+| **Steered handoff.** "The host lowers the Diet Coke down behind the counter…", then the next product is lifted into the same take. | **Open bidding.** A +5 raise put Glow Ramen next; the graphics switch once it is in his hands. |
+| ![Advertiser console: AI draft with the staged studio start frame, copy, prices and facts](docs/screenshots/console-draft.jpg) | ![Live bid board: Diet Coke first in line at 30 credits/min](docs/screenshots/console-bid-board.jpg) |
+| **AI draft.** Upload a photo; the producer drafts copy, facts, scene beats and the start frame. | **Bid board.** The highest bid airs next. |
+| ![Insights: viewers over time with on-air answers marked, every card badged MOCKED DATA](docs/screenshots/insights.jpg) | |
+| **Insights.** Audience and conversions, mocked for the demo and labelled that way. | |
 
 ## Why it needs a live model
 
