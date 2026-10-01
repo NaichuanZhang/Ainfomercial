@@ -293,6 +293,9 @@ export function useDirector({
             if (cue) {
               prompt = cue;
             } else {
+              // A beat needs its full window before the handoff quiet period, so a short demo
+              // segment plays pick-up -> one beat -> put-down instead of cutting a beat short.
+              if (now + BEAT_SECONDS * 1000 > handoffAt - HANDOFF_QUIET_MS) continue;
               // A single scripted beat is sent once; longer scripts cycle.
               if (!campaign.beats.length || (campaign.beats.length < 2 && beat >= 0)) continue;
               beat = (beat + 1) % campaign.beats.length;

@@ -10,7 +10,7 @@ import {
   listInsightsCampaigns,
   type InsightsCampaignId,
 } from "@/lib/mock-insights";
-import { SEGMENT_SECONDS } from "@/lib/station-types";
+import { SEGMENT_SECONDS } from "@/lib/mock-insights";
 
 import { AudienceSection } from "./audience-section";
 import { ConversionsSection } from "./conversions-section";

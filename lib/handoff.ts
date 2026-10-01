@@ -10,9 +10,9 @@
  */
 
 /** How long before `segment_ends_at` the put-down shot is sent (ahead of the 4 s no-prompt cutoff). */
-export const HANDOFF_LEAD_MS = 9_000;
+export const HANDOFF_LEAD_MS = 8_000;
 /** No new scripted beat this long before the put-down, so the picture is settled when it lands. */
-export const HANDOFF_QUIET_MS = 3_000;
+export const HANDOFF_QUIET_MS = 2_000;
 /**
  * `channel_state.beat_index` value that marks the handoff. The host strip speaks HANDOFF_LINE
  * instead of a script line; a campaign never has this many beats (<= 8).

@@ -1,6 +1,6 @@
 "use client";
 
-import { SEGMENT_SECONDS } from "@/lib/station-types";
+import { SEGMENT_SECONDS } from "@/lib/mock-insights";
 import { fmtClock, fmtCompact, fmtInt, type AnswerMarker, type ViewerPoint } from "@/lib/mock-insights";
 
 import { InsightCard, Legend, PALETTE, useContainerWidth } from "./chart-kit";

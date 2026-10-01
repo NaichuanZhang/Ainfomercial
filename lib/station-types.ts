@@ -70,10 +70,13 @@ export const CAMPAIGN_PUBLIC_COLUMNS =
 export const CHANNEL_PUBLIC_COLUMNS =
   "id,status,session_id,airing_campaign_id,segment_started_at,segment_ends_at,beat_index,current_prompt,airtime_day,airtime_seconds_day,updated_at";
 
-/** Seconds each product stays on air per segment. */
-export const SEGMENT_SECONDS = 75;
+/**
+ * Seconds each product stays on air per segment, staging included. Short for the demo: each ad is
+ * pick up -> intro line -> one scene beat -> put down, then the next product.
+ */
+export const SEGMENT_SECONDS = 30;
 /** Seconds between scripted scene beats (>= 2 chunks, so morphs land). */
-export const BEAT_SECONDS = 9;
+export const BEAT_SECONDS = 7;
 /** Director lease length; the director renews every LEASE_RENEW_MS. */
 export const LEASE_TTL_SECONDS = 15;
 export const LEASE_RENEW_MS = 5_000;

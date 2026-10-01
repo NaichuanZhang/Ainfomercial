@@ -12,7 +12,8 @@
  * - spend = bid (credits/min) x airtime minutes x CREDIT_USD; ROAS = revenue / spend
  */
 
-import { SEGMENT_SECONDS } from "@/lib/station-types";
+/** The mocked "previous airing" ran production-length 75 s segments (the live demo uses short ones). */
+export const SEGMENT_SECONDS = 75;
 
 /** Demo credit value in dollars; bids on the live board are credits per minute. */
 export const CREDIT_USD = 8;
