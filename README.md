@@ -12,6 +12,14 @@ Built for the [Visko Orbis Online Challenge](https://www.visko.ai/challenge/orbi
 Live: https://5whyuw3k.insforge.site · `/live` (the channel) · `/console` (advertisers) ·
 `/console/insights` (mocked analytics) · **[`/demo`](https://5whyuw3k.insforge.site/demo) (2:45 demo video)**
 
+## Demo video
+
+[![Watch the A.Infomercial demo (2:45) on YouTube](docs/demo-thumbnail.jpg)](https://www.youtube.com/watch?v=jA58-AasDsA)
+
+**[Watch on YouTube](https://www.youtube.com/watch?v=jA58-AasDsA)** (2:45, 1080p) · also on the site at
+[`/demo`](https://5whyuw3k.insforge.site/demo) with chapters: what it is → advertiser console → the live
+channel (on-air Q&A, a +5 raise, steered handoffs in one continuous Orbis take) → insights.
+
 ## Screenshots
 
 | | |

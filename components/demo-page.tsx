@@ -8,6 +8,7 @@ import { useStation } from "@/hooks/use-station";
 const VIDEO =
   "https://5whyuw3k.us-east.insforge.app/api/storage/buckets/product-images/objects/demo%2Fvideo%2Fainfomercial-demo-10mb.mp4";
 const REPO = "https://github.com/NaichuanZhang/Ainfomercial";
+const YOUTUBE = "https://www.youtube.com/watch?v=jA58-AasDsA";
 
 const CHAPTERS = [
   { at: 0, label: "What it is and what it showcases" },
@@ -70,8 +71,9 @@ export function DemoPage() {
               </Link>
             </p>
             <p>
+              <a href={YOUTUBE}>Watch on YouTube (1080p)</a> ·{" "}
               <a href={VIDEO} download="ainfomercial-demo.mp4">
-                Download the video (MP4, 9 MB)
+                Download the MP4 (9 MB)
               </a>{" "}
               · <a href={REPO}>Source on GitHub</a>
             </p>
