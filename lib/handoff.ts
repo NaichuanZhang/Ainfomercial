@@ -34,27 +34,64 @@ export const SEAM_SETTLE_MS = 500;
 /** Longest a held frame stays up before the honest full-screen bumper takes over (director lost). */
 export const SEAM_MAX_MS = 20_000;
 
+/*
+ * Handoff prompts follow the Orbis prompt guide: after the first prompt, never restate the world;
+ * one physical action per prompt, given 2-4 s to land; new subjects enter through an action, and
+ * a subject leaves only when a prompt says so.
+ */
+
+/** A product's visible description as a noun phrase, e.g. "a white knit-mesh running shoe ...". */
+const lookPhrase = (look?: string | null) => {
+  const described = (look ?? "").trim().replace(/[.\s]+$/, "");
+  return described ? `a ${described.charAt(0).toLowerCase()}${described.slice(1)}` : "";
+};
+
+/** Step 1 of the handoff: the current product leaves the scene. */
 export const putDownPrompt = (product: string) =>
-  `The host places the ${product} down behind the counter, out of view, then rests both empty hands on the counter and smiles at the camera.`;
+  `The host lowers the ${product} down behind the counter, out of view.`;
+
+/** Step 2, one landing later: an empty-handed beat that the next product enters from. */
+export const EMPTY_HANDS_PROMPT = "The host rests both empty hands on the counter and smiles at the camera.";
+
+/** How long after the put-down the empty-hands step is sent (one morph lands in 2-4 s). */
+export const EMPTY_HANDS_AFTER_MS = 3_500;
 
 /**
- * Continuous handoff: the same Orbis run keeps going and the next product is brought into the
- * scene by an action (the prompt guide's way to introduce a new subject), so there is no reset,
- * no stall and no cut. `look` is the campaign's one-line visual description.
+ * Step 3, the next segment's first prompt: the next product enters the same continuous take
+ * through an action, named by what the camera sees (the model renders nouns, not brands).
  */
 export const bringUpPrompt = (product: string, look?: string | null) => {
-  const described = (look ?? "").trim().replace(/[.\s]+$/, "");
-  const detail = described ? ` The ${product} is a ${described.charAt(0).toLowerCase()}${described.slice(1)}.` : "";
-  return `The host lifts the ${product} up from behind the counter and holds it toward the camera with a big closed-mouth grin.${detail}`;
+  const noun = lookPhrase(look);
+  return noun
+    ? `The host lifts the ${product}, ${noun}, up from behind the counter and holds it toward the camera.`
+    : `The host lifts the ${product} up from behind the counter and holds it toward the camera.`;
 };
+
+/** Used when a product stays on air after being put down (the queue changed late). */
+export const pickUpPrompt = (product: string) =>
+  `The host lifts the ${product} back up from behind the counter and holds it toward the camera.`;
+
+/**
+ * The first prompt of a run (with the start frame): WHO + WHAT + WHERE + camera, under 100 words.
+ * The lips-closed direction lives here once; following prompts do not restate it.
+ */
+export const openingPrompt = (hostLook: string, product: string, look?: string | null) => {
+  const noun = lookPhrase(look) || `the ${product}`;
+  return (
+    `${hostLook.charAt(0).toUpperCase()}${hostLook.slice(1)} stands behind a glossy black studio counter under a warm spotlight, his lips gently closed in a warm smile, ` +
+    `with ${noun} standing on a black display pedestal to his right. He reaches over to the pedestal and picks up the ${product}. ` +
+    "Medium shot, eye-level, static camera, shallow depth of field."
+  );
+};
+
+/** Scripted beats were written to stand alone; inside a running take the host needs no re-introduction. */
+export const followingPrompt = (prompt: string) =>
+  prompt.replace(/^The smiling host in the teal suit and gold tie\b/i, "The host").replace(/\s+/g, " ").trim();
 
 /**
  * A run is refreshed (reset + new start frame, behind the seam cover) once it is this old, because
  * Orbis holds a scene best over its first few minutes. Product changes inside a run are continuous.
  */
 export const RUN_REFRESH_MS = 5 * 60_000;
-
-export const pickUpPrompt = (product: string) =>
-  `The host reaches over to the black display pedestal on the right, picks up the ${product} and holds it up toward the camera with a big closed-mouth grin.`;
 
 export const isHandoffBeat = (beatIndex: number | null | undefined) => beatIndex === HANDOFF_BEAT_INDEX;

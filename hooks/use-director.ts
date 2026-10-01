@@ -13,12 +13,16 @@ import {
   RESET_SETTLE_MS,
   RUN_REFRESH_MS,
   bringUpPrompt,
+  EMPTY_HANDS_AFTER_MS,
+  EMPTY_HANDS_PROMPT,
+  followingPrompt,
+  openingPrompt,
 } from "@/lib/handoff";
 import {
   BEAT_SECONDS,
   type Campaign,
   type ChannelState,
-  HOST_SILENT_DIRECTION,
+  HOST_LOOK,
   LEASE_RENEW_MS,
 } from "@/lib/station-types";
 
@@ -30,10 +34,6 @@ export type DirectorApi = {
   log: string[];
   error: string;
 };
-
-/** Every scene prompt keeps the host silent (see HOST_SILENT_DIRECTION). */
-const silent = (prompt: string) =>
-  prompt.includes("lips gently closed") ? prompt : `${prompt.replace(/\s+$/, "")} ${HOST_SILENT_DIRECTION}`;
 
 const sleep = (ms: number, signal: { cancelled: boolean }) =>
   new Promise<void>((resolve) => {
@@ -209,8 +209,8 @@ export function useDirector({
       const conditionsReady = waitFor((m) => m.type === "conditions_ready", "conditions", 20_000);
       // The start frame has the product resting on the pedestal: the run opens with the host
       // picking it up, and the scripted beats follow from beats[0].
-      await send("set_prompt", { prompt: silent(pickUpPrompt(campaign.product_name)) });
-      note(`handoff: pick up ${campaign.product_name}`);
+      await send("set_prompt", { prompt: openingPrompt(HOST_LOOK, campaign.product_name, campaign.look) });
+      note(`opening: pick up ${campaign.product_name}`);
       await conditionsReady.catch(() => null);
       const started = waitFor((m) => m.type === "generation_started", "generation start", 30_000);
       await send("start");
@@ -237,7 +237,7 @@ export function useDirector({
             continue;
           }
           if (continuous && runStarted.current && campaign.id !== airingId) {
-            await send("set_prompt", { prompt: silent(bringUpPrompt(campaign.product_name, campaign.look)) });
+            await send("set_prompt", { prompt: bringUpPrompt(campaign.product_name, campaign.look) });
             note(`handoff: bring up ${campaign.product_name} (same take)`);
             airingId = campaign.id;
           } else if (campaign.id !== airingId || !runStarted.current) {
@@ -249,7 +249,7 @@ export function useDirector({
             note(`${campaign.product_name} stays on air`);
             if (putDownId === campaign.id) {
               // The queue changed after the put-down: have the host pick the same product back up.
-              await send("set_prompt", { prompt: silent(pickUpPrompt(campaign.product_name)) });
+              await send("set_prompt", { prompt: pickUpPrompt(campaign.product_name) });
               note(`handoff: pick up ${campaign.product_name}`);
             }
           }
@@ -264,6 +264,7 @@ export function useDirector({
           let lastPrompt = Date.now();
           // Who airs next, looked up once (read-only) shortly before the put-down is due.
           let upNext: { id: string | null; name: string | null } | null = null;
+          let emptyHandsSent = false;
           while (!signal.cancelled && Date.now() < endsAt - 1_000) {
             await sleep(500, signal);
             const now = Date.now();
@@ -284,8 +285,13 @@ export function useDirector({
               // The put-down wins: a late Q&A shot would fight the morph, so it is dropped (the
               // spoken answer still plays on every tab).
               cueQueue.current = [];
+              if (putDownId === campaign.id && !emptyHandsSent && now >= handoffAt + EMPTY_HANDS_AFTER_MS) {
+                await send("set_prompt", { prompt: EMPTY_HANDS_PROMPT });
+                emptyHandsSent = true;
+                note("handoff: empty hands");
+              }
               if (now >= handoffAt && putDownId !== campaign.id) {
-                await send("set_prompt", { prompt: silent(putDownPrompt(campaign.product_name)) });
+                await send("set_prompt", { prompt: putDownPrompt(campaign.product_name) });
                 putDownId = campaign.id;
                 note(`handoff: put down ${campaign.product_name}`);
                 // Marks the handoff in channel_state: every tab's host strip speaks the handoff line.
@@ -314,7 +320,7 @@ export function useDirector({
               beat = (beat + 1) % campaign.beats.length;
               prompt = campaign.beats[beat];
             }
-            await send("set_prompt", { prompt: silent(prompt) });
+            await send("set_prompt", { prompt: followingPrompt(prompt) });
             lastPrompt = Date.now();
             await directorCall(clientId, "beat", { beatIndex: Math.max(beat, 0), prompt });
           }
