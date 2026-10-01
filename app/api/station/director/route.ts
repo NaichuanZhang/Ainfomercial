@@ -49,6 +49,16 @@ export async function POST(request: Request) {
         const next = await startSegment(campaign);
         return json({ campaign, channel: publicChannel(next) });
       }
+      case "peek_next": {
+        // Read-only look at who airs after the current product, so the director can have the host
+        // put it down before the segment ends. Nothing is billed or re-queued here.
+        const upcoming = await pickNextCampaign(channel.airing_campaign_id);
+        return json({
+          nextCampaignId: upcoming?.id ?? null,
+          nextProductName: upcoming?.product_name ?? null,
+          channel: publicChannel(channel),
+        });
+      }
       case "live": {
         const next = await updateChannel({ status: "live" });
         return json({ channel: publicChannel(next) });

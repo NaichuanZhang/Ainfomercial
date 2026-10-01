@@ -4,6 +4,7 @@ import { ReactorProvider, ReactorView, useReactor } from "@reactor-team/js-sdk";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { type HostApi, HostStrip } from "@/components/live/host-strip";
+import { SEAM_IDLE, SeamContext, SeamCover, type SeamState } from "@/components/live/seam-cover";
 import { Icon } from "@/components/shell/icons";
 import { directorCall, type DirectorApi, useDirector } from "@/hooks/use-director";
 import { ORBIS_TRACKS } from "@/lib/orbis";
@@ -67,6 +68,10 @@ export function StationPlayer({
   const [error, setError] = useState("");
   const [muted, setMuted] = useState(false);
   const [voiceMuted, setVoiceMuted] = useState(false);
+  const [seam, setSeam] = useState<SeamState>(SEAM_IDLE);
+  const frameRef = useRef<HTMLDivElement>(null);
+  // The <video> is rendered by the Reactor SDK inside the frame; the seam cover looks it up live.
+  const getVideo = useCallback(() => frameRef.current?.querySelector("video") ?? null, []);
   const hostRef = useRef<HostApi | null>(null);
   const onHostRef = useRef(onHost);
   onHostRef.current = onHost;
@@ -146,7 +151,7 @@ export function StationPlayer({
   }, []);
 
   return (
-    <div className="player-frame">
+    <div className="player-frame" ref={frameRef}>
       {ticket ? (
         <ReactorProvider
           key={`${ticket.sessionId ?? "new"}:${ticket.jwt.slice(-12)}`}
@@ -169,7 +174,10 @@ export function StationPlayer({
         <div className="player-idle" />
       )}
 
-      {children}
+      {/* Product change: hold the last live frame while the next Orbis run warms up. */}
+      <SeamCover channel={channel} active={tuned && !!ticket} getVideo={getVideo} onChange={setSeam} />
+
+      <SeamContext.Provider value={seam}>{children}</SeamContext.Provider>
 
       <HostStrip
         active={tuned && !!ticket}
