@@ -17,8 +17,10 @@ Live: https://5whyuw3k.insforge.site · `/live` (the channel) · `/console` (adv
 A pre-rendered ad can't answer a question it has never heard. Here the picture is a live
 Orbis session that never repeats:
 
-- **Every product is a new chapter.** Its staged studio shot becomes the start frame
-  (`set_image` → `set_prompt` → `start`), then scripted scene beats morph every ~9 s.
+- **One continuous take.** The broadcast opens on the first product's staged studio shot
+  (`set_image` → `set_prompt` → `start`) and then never cuts: every 30 s the host, Max Marquee,
+  lowers the product out of view and lifts the next one into the same shot, steered purely by
+  `set_prompt` (one physical action per prompt, per the Orbis prompt guide).
 - **Every viewer question changes the shot.** "Does it taste like regular Coke?" gets a
   spoken, fact-grounded answer and a new scene prompt (a pour over ice), which lands 2-4 s
   later on everyone's screen.
@@ -29,10 +31,11 @@ Orbis session that never repeats:
 
 | Piece | What it does |
 | - | - |
-| `/console` | Upload a photo → **AI draft** (vision model reads the pack: tagline, look, taste, facts, 5 scene beats, jingle prompt; an image model stages the product on the studio set) → edit → bid → submit. Live bid board with +5 raises. |
-| `/live` | One shared Orbis session per channel. HTML overlays (item #, price box, fact card, on-air clock, "AI-generated" label, "Coming up next" bumper), realtime chat, viewer count, bid rail. |
+| `/console` | Upload a photo → **AI draft** (vision model reads the pack: tagline, look, taste, facts, 5 scene beats, host script; an image model places the product on the pedestal of the shared studio plate) → edit → bid → submit. Live bid board with +5 raises. |
+| `/live` | Twitch-style channel page around one shared Orbis session. HTML overlays (item #, price box, fact card, on-air clock, "AI-generated" label, "Up next" bar) that switch when the product changes in the picture, realtime chat, viewer count, bid rail. |
+| Sound | Orbis audio is switched off (`set_audio_enabled false`): with a host in frame it invented garbled speech. Max performs silently, lips closed, like a silent-film showman; his voice is cached Gemini TTS ("thinking out loud", with captions), over a lounge loop synthesized in the browser with Web Audio that ducks under his voice. |
 | Director | The first viewer's tab holds a 15 s lease and runs the airing loop: pick the top bid, stage it, walk its beats, cue answer shots, bill airtime. If that tab closes, another viewer's tab takes over the same session. |
-| Handoff | Orbis takes a new start frame only after `reset` + `start`, so a product change is choreographed, not cut (`lib/handoff.ts`): ~9 s before the segment ends the director has Max put the product down (pedestal empty, hands on the counter) and every tab's host voice says the handoff line; when the channel flips to the next product each tab holds the last live frame under a slim "Up next" lower third while the new run warms up, then crossfades to Max picking the next product up off the pedestal. Dev harness: `/lab/handoff`. |
+| Handoff | Steered, not stitched (`lib/handoff.ts`): 8 s before a 30 s segment ends the director prompts "The host lowers the X down behind the counter, out of view." (every tab's host voice says the handoff line and the graphics drop to an "Up next" bar), 3.5 s later "rests both empty hands on the counter", and the next segment opens with "The host lifts the Y, *its look*, up from behind the counter…", with its graphics sliding in once the lift has landed. The run is only restarted from a start frame near Orbis's ~61 min limit (behind a freeze-frame crossfade; harness `/lab/handoff`). |
 | Host | `lib/server/host-answer.ts`: picks the best fresh viewer question, answers in ≤ 30 words from the campaign facts only (deflects off-topic, medical and prompt-injection questions), chooses the fact to highlight, and writes the Orbis re-stage prompt. p50 1.8 s. |
 | Session | Created server-side (`POST /sessions`), so no browser tab owns it. Tabs attach with bound tokens that cannot create sessions. A reaper ends it 60 s after the last director heartbeat. |
 | Backend | [InsForge](https://insforge.dev): Postgres (campaigns, chat, channel state, RLS: public read, server-only writes), Storage (product images), Realtime (`station:main` events, `station:viewers` presence), Sites (Vercel hosting), Model Gateway (OpenRouter). |
